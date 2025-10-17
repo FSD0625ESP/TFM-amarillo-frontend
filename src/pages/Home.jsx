@@ -5,6 +5,7 @@ import heroPic from "../assets/heroPicSagradaFamilia.png";
 import iconNacimiento from "../assets/iconNacimiento.png";
 import iconPasion from "../assets/iconPasion.png"; // <-- ruta correcta
 import FactSection from "../components/FactSection";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 export default function Home() {
   const [theme, setTheme] = useState("day");
@@ -74,9 +75,9 @@ export default function Home() {
           </p>
 
           <div className="intro-cta">
-            <a href="/upload" className="btn-cta">
+            <Link to="/registration" className="btn btn-primary">
               Colabora con tu foto
-            </a>
+            </Link>
             <a href="/mosaic" className="btn-link">
               Ver el mosaico
             </a>
