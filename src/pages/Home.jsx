@@ -3,24 +3,26 @@ import React, { useState, useEffect } from "react";
 import "./Home.css";
 import heroPic from "../assets/heroPicSagradaFamilia.png";
 import iconNacimiento from "../assets/iconNacimiento.png";
-import iconPasion from "../assets/iconPasion.png"; // <-- ruta correcta
+import iconPasion from "../assets/iconPasion.png";
 import FactSection from "../components/FactSection";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-
+import { Link } from "react-router-dom";
+import PhotoCarousel from "../components/PhotoCarousel";
 export default function Home() {
   const [theme, setTheme] = useState("day");
+  const [stats, setStats] = useState({
+    fotos: 1523,
+    colaboradores: 847,
+    paises: 27,
+  });
 
-  // Detectar automáticamente la hora local al cargar la página
+  // Detectar automáticamente la hora local
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour >= 21 || hour < 6) {
-      setTheme("sunset");
-    } else {
-      setTheme("day");
-    }
+    if (hour >= 21 || hour < 6) setTheme("sunset");
+    else setTheme("day");
   }, []);
 
-  // Aplicar el tema al documento
+  // Aplicar el tema
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
@@ -47,8 +49,13 @@ export default function Home() {
           className="theme-icon"
         />
       </button>
-
-      {/* Sección de introducción */}
+      {/* FACTS */}
+      <section className="fact-section" aria-labelledby="fact-title">
+        <div className="fact-inner">
+          <FactSection />
+        </div>
+      </section>
+      {/* INTRODUCCIÓN */}
       <section className="intro-section" aria-labelledby="intro-title">
         <div className="intro-inner">
           <h2 id="intro-title" className="intro-title">
@@ -65,27 +72,25 @@ export default function Home() {
           <p className="intro-text">
             Inspirados por el espíritu participativo de Barcelona, invitamos a
             cualquier persona a aportar su propia fotografía de la Sagrada
-            Família, sin importar su fecha, ángulo o color, para formar parte
-            del mosaico colaborativo del monumento que reúna todas nuestras
-            historias y memorias.
+            Família para formar parte del mosaico colaborativo que reúna todas
+            nuestras miradas y memorias.
           </p>
 
           <p className="intro-tagline">
-            Cada imagen cuenta una parte de esta historia. Suma la tuya ahora!
+            Cada imagen cuenta una parte de esta historia. ¡Suma la tuya ahora!
           </p>
 
           <div className="intro-cta">
             <Link to="/registration" className="btn btn-primary">
               Colabora con tu foto
             </Link>
-            <a href="/mosaic" className="btn-link">
+            <Link to="/mosaic" className="btn-link">
               Ver el mosaico
-            </a>
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* Imagen hero del mosaico */}
+      {/* HERO MOSAICO */}
       <section className="hero-preview">
         <img
           src={heroPic}
@@ -93,6 +98,67 @@ export default function Home() {
           loading="lazy"
         />
       </section>
+      {/* 📊 SECCIÓN DE ESTADÍSTICAS */}
+      <section className="stats-section">
+        <h3 className="stats-title">Nuestra comunidad en cifras</h3>
+        <div className="stats-grid">
+          <div className="stat-item">
+            <span className="stat-number">{stats.fotos.toLocaleString()}</span>
+            <span className="stat-label">Fotos subidas</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">
+              {stats.colaboradores.toLocaleString()}
+            </span>
+            <span className="stat-label">Colaboradores</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">{stats.paises}</span>
+            <span className="stat-label">Países participantes</span>
+          </div>
+        </div>
+      </section>
+      {/* 🖼️ SECCIÓN CARRUSEL */}
+      <section className="carousel-section">
+        <h2 className="section-title">Destacados del mosaico</h2>
+        <PhotoCarousel
+          images={[
+            {
+              src: "",
+              alt: "Fotografía más antigua del mosaico",
+              title: "La más antigua",
+              description: "Capturada en 1885 por un visitante desconocido.",
+            },
+            {
+              src: "",
+              alt: "Fotografía más reciente del mosaico",
+              title: "La más reciente",
+              description:
+                "Tomada hace solo unos días por un colaborador local.",
+            },
+            {
+              src: "",
+              alt: "Fotografía más votada",
+              title: "La más votada",
+              description: "Favorita entre los visitantes de todo el mundo.",
+            },
+          ]}
+        />
+      </section>
+      {/* 🔻 FOOTER */}
+      <footer className="footer">
+        <p>
+          © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API
+          — Desarrollado por el equipo Full Stack 2025.
+        </p>
+        <nav className="footer-links">
+          <a href="/about">Sobre el proyecto</a>
+          <a href="/api/docs">API Docs</a>
+          <a href="https://github.com" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+        </nav>
+      </footer>
     </main>
   );
 }
