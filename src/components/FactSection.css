@@ -1,0 +1,39 @@
+.fact-section {
+  width: 100%;
+  background-color: rgba(245, 237, 220, 0.65);
+  border-bottom: 1px solid rgba(214, 164, 97, 0.45);
+  padding: 0.6rem 0.75rem;
+  text-align: center;
+  color: var(--text);
+  font-family: "Poppins", sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+[data-theme="sunset"] .fact-section {
+  background-color: rgba(75, 54, 33, 0.85);
+  color: #f4e6c1;
+}
+
+.fact-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.fact-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+.fact-text {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.fact-loading {
+  margin: 0.25rem 0 0;
+  color: rgba(0, 0, 0, 0.6);
+}

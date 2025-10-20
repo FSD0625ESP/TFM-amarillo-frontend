@@ -1,2 +1,152 @@
 @plugin "daisyui";
 @import "tailwindcss";
+
+:root {
+  /* Día - piedra clara y dorado Gaudí */
+  --bg: #fffdf8;
+  --text: #4b3621; /* marrón piedra */
+  --accent: #d6a461; /* dorado cálido */
+  --accent-hover: #c9954a;
+}
+
+[data-theme="sunset"] {
+  /* Atardecer - tonos terracota y violeta */
+  --bg: #4b3621;
+  --text: #f3ede1;
+  --accent: #f4a261; /* naranja atardecer */
+  --accent-hover: #e76f51;
+}
+
+/* Paletas dinámicas */
+.theme-day {
+  --bg: var(--bg-day);
+  --text: var(--text-day);
+  --accent: var(--accent-day);
+  --highlight: var(--highlight-day);
+}
+.theme-sunset {
+  --bg: var(--bg-sunset);
+  --text: var(--text-sunset);
+  --accent: var(--accent-sunset);
+  --highlight: var(--highlight-sunset);
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: all 0.4s ease;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--highlight);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+}
+
+/* Título */
+.title-section {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* Mural */
+.mural-placeholder {
+  background-color: #d2b48c;
+  height: 300px;
+  margin: 2rem 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+}
+
+/* Barra de progreso */
+.progress-container {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.progress-bar {
+  background-color: #d3d3d3;
+  border-radius: 10px;
+  height: 20px;
+  width: 80%;
+  margin: 0 auto;
+}
+.progress-fill {
+  background-color: var(--accent);
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* Carrusel */
+.carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photos {
+  display: flex;
+  gap: 1rem;
+}
+.photo {
+  width: 100px;
+  height: 100px;
+  background-color: #d2b48c;
+  border-radius: 8px;
+}
+.arrow {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Botones */
+.btn-primary {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 0.5rem;
+}
+.btn-secondary {
+  background-color: var(--text);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 3rem;
+  padding: 1rem 0;
+  background-color: var(--highlight);
+  color: white;
+  border-radius: 10px;
+}
+.footer a {
+  color: white;
+  text-decoration: none;
+}
