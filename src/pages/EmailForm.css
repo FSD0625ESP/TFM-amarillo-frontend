@@ -1,0 +1,108 @@
+.email-form-container {
+  max-width: 420px;
+  margin: 5rem auto;
+  padding: 2.5rem;
+  background: var(--bg-card, #fff8f2);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.email-form-container:hover {
+  transform: translateY(-3px);
+}
+
+.email-form-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary, #333);
+  font-weight: 600;
+}
+
+.email-form-subtitle {
+  color: var(--text-secondary, #555);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.email-input {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid #ffd6b0;
+  border-radius: 1rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #fff;
+}
+
+.email-input:focus {
+  border-color: #ff8b3d;
+  box-shadow: 0 0 0 3px rgba(255, 139, 61, 0.2);
+}
+
+.btn-send {
+  width: 100%;
+  margin-top: 1.8rem;
+  padding: 0.9rem 1.5rem;
+  background: linear-gradient(135deg, #ff8b3d, #ffb347);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease, transform 0.2s;
+}
+
+.btn-send:hover {
+  background: linear-gradient(135deg, #ff7a1f, #ffaa33);
+  transform: translateY(-2px);
+}
+
+.btn-send:disabled {
+  background: #ffd6b0;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #d93025;
+  font-size: 0.9rem;
+  margin-top: 0.8rem;
+}
+
+.success-message {
+  color: #2e7d32;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+/* Animación suave al aparecer */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.email-form-container {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .email-form-container {
+    margin: 3rem 1rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .email-form-title {
+    font-size: 1.5rem;
+  }
+}
