@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./LoginAdmin.css";
+import axios from "axios";
 
 function LoginAdmin() {
   const [password, setPassword] = useState("");
@@ -7,30 +7,23 @@ function LoginAdmin() {
   const [loading, setLoading] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
 
-  const correctPassword = "admin123"; // cambia esta contraseña según necesites
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (password === correctPassword) {
-      setLoading(true);
-      // Simula carga del sistema
-      setTimeout(() => {
-        setLoading(false);
-        setLoggedIn(true);
-      }, 2000);
-    } else {
-      setError("Contraseña incorrecta. Inténtalo de nuevo.");
+    setLoading(true);
+    try {
+      const res = await axios.post("http://localhost:3000/admins/login", { password });
+      localStorage.setItem("adminToken", res.data.token);
+      setLoggedIn(true);
+    } catch (err) {
+      setError(err.response?.data?.message || "Error al iniciar sesión");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (loggedIn) {
-    return (
-      <div className="login-container">
-        <h2>Bienvenido, administrador 👋</h2>
-      </div>
-    );
+    return <div className="login-container"><h2>Bienvenido, admin 👋</h2></div>;
   }
 
   return (
@@ -39,17 +32,14 @@ function LoginAdmin() {
       <form onSubmit={handleSubmit}>
         <input
           type="password"
-          placeholder="Introduce la contraseña"
+          placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
-        <button type="submit" disabled={loading}>
-          {loading ? "Cargando..." : "Entrar"}
-        </button>
+        <button type="submit" disabled={loading}>{loading ? "Cargando..." : "Entrar"}</button>
       </form>
-
       {error && <p className="error">{error}</p>}
-      {loading && <div className="spinner"></div>}
     </div>
   );
 }

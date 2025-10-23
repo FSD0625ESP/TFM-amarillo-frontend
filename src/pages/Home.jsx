@@ -81,7 +81,7 @@ export default function Home() {
           </p>
 
           <div className="intro-cta">
-            <Link to="/registration" className="btn btn-primary">
+            <Link to="/" className="btn btn-primary">
               Colabora con tu foto
             </Link>
             <Link to="/mosaic" className="btn-link">
