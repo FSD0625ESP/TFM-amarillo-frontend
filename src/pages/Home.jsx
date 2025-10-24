@@ -7,6 +7,9 @@ import iconPasion from "../assets/iconPasion.png";
 import FactSection from "../components/FactSection";
 import { Link } from "react-router-dom";
 import PhotoCarousel from "../components/PhotoCarousel";
+import MosaicProgressBar from "../components/MosaicProgressBar";
+import LiveCamera from "../components/LiveCamera";
+
 export default function Home() {
   const [theme, setTheme] = useState("day");
   const [stats, setStats] = useState({
@@ -98,6 +101,9 @@ export default function Home() {
           loading="lazy"
         />
       </section>
+      {/* SECCIÓN BARRA DE PROGRESO DEL MOSAICO */}
+      <MosaicProgressBar />
+
       {/* 📊 SECCIÓN DE ESTADÍSTICAS */}
       <section className="stats-section">
         <h3 className="stats-title">Nuestra comunidad en cifras</h3>
@@ -159,6 +165,7 @@ export default function Home() {
           </a>
         </nav>
       </footer>
+      <LiveCamera />
     </main>
   );
 }

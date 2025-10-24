@@ -1,0 +1,79 @@
+.livecam-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 260px;
+  height: 155px;
+  z-index: 9999;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff7f1;
+  border: 2px solid #ffd6b0;
+  box-shadow: 0 6px 18px rgba(255, 122, 31, 0.25);
+  transition: all 0.35s ease-in-out;
+  animation: fadeInCam 0.8s ease forwards;
+}
+
+.livecam-container:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 22px rgba(255, 122, 31, 0.35);
+}
+
+/* Modo expandido */
+.livecam-container.expanded {
+  width: 85vw;
+  height: 70vh;
+  bottom: 50%;
+  right: 50%;
+  transform: translate(50%, 50%);
+  box-shadow: 0 0 40px rgba(255, 122, 31, 0.45);
+  border: 3px solid #ffb774;
+  background: #fff4ea;
+}
+
+/* Iframe */
+.livecam-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: inherit;
+}
+
+/* Botón expandir */
+.livecam-expand-btn,
+.livecam-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.livecam-expand-btn:hover,
+.livecam-close-btn:hover {
+  background: #ffd9ae;
+}
+
+/* Animación de aparición */
+@keyframes fadeInCam {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive: ocultar en móviles */
+@media (max-width: 768px) {
+  .livecam-container {
+    display: none;
+  }
+}
