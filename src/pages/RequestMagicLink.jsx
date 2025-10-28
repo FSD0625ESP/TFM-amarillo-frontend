@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import "./UserRegistration.css";
 
 export default function RequestMagicLink() {
   const [email, setEmail] = useState("");
@@ -21,13 +22,11 @@ export default function RequestMagicLink() {
   };
 
   return (
-    <div>
-      <h2>Solicitar enlace</h2>
+    <div className="registro-container">
+      <h2>Solicita tu enlace mágico ✨</h2>
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Correo electrónico</label>
         <input
-          id="email"
           type="email"
           value={email}
           placeholder="tucorreo@dominio.com"
@@ -40,7 +39,7 @@ export default function RequestMagicLink() {
         </button>
       </form>
 
-      {msg && <p>{msg}</p>}
+      {msg && <p className="error">{msg}</p>}
     </div>
   );
 }

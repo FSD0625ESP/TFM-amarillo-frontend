@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import "./LoginAdmin.css"; 
 
 function LoginAdmin() {
   const [password, setPassword] = useState("");
