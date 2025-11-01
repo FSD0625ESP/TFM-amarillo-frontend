@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.14",
+    "@tailwindcss/vite": "^4.1.16",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
-    "daisyui": "^5.1.29",
+    "daisyui": "^5.3.10",
     "date-fns": "^4.1.0",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
@@ -23,7 +23,7 @@
     "reactstrap": "^9.2.3",
     "scheduler": "^0.27.0",
     "tailwind": "^4.0.0",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^4.1.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

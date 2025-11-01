@@ -1,5 +1,5 @@
-@plugin "daisyui";
 @import "tailwindcss";
+@plugin "daisyui";
 
 :root {
   /* Día - piedra clara y dorado Gaudí */
