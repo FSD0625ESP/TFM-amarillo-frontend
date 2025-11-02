@@ -150,3 +150,10 @@ body {
   color: white;
   text-decoration: none;
 }
+
+/* Sobrescribe el fondo naranja del menú lateral de Admin */
+.admin-layout .menu li > * {
+  background: transparent !important;
+  border-radius: 0 !important;
+  color: var(--text);
+}
