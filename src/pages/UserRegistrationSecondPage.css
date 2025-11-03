@@ -1,0 +1,90 @@
+.upload-container {
+  max-width: 500px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: var(--form-bg, #fff);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body.dark-mode .upload-container {
+  background: #2b2b30;
+  color: #f3f3f3;
+}
+
+h2 {
+  text-align: center;
+  color: var(--accent-color, #ff7b00);
+}
+
+.user-info-text {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .user-info-text {
+  color: #aaa;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+input[type="text"],
+input[type="email"],
+textarea,
+.year-picker {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode textarea,
+body.dark-mode .year-picker {
+  background: #3a3a3f;
+  border-color: #555;
+  color: #f3f3f3;
+}
+
+input[readonly] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button {
+  background: linear-gradient(135deg, #ffb347, #ffcc33);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode button {
+  background: linear-gradient(135deg, #ff9d33, #ff7b00);
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+}
+
+.error-list {
+  margin-top: 1rem;
+}

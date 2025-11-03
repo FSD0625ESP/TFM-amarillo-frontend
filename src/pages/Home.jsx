@@ -39,7 +39,7 @@ export default function Home() {
       {/* Botón para alternar el modo manualmente */}
       <button
         className="theme-toggle"
-        onClick={toggleTheme}
+        //onClick={toggleTheme}
         aria-label="Cambiar entre modo día y atardecer"
       >
         <img
