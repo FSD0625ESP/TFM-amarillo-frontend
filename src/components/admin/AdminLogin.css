@@ -106,3 +106,29 @@ button:disabled {
     font-size: 1.5rem;
   }
 }
+
+/* Password input and toggle icon styles */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 2.5rem; /* Adds space for the icon */
+  background-color: #fff; /* Ensure background remains consistent */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  cursor: pointer;
+  color: #555;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

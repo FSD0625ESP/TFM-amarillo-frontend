@@ -6,25 +6,21 @@ import UserRegistration from "./pages/UserRegistration";
 import EmailForm from "./pages/EmailForm";
 import MagicLinkVerification from "./pages/MagicLinkVerification";
 import Admin from "./pages/Admin";
-import LoginAdmin from "./components/LoginAdmin";
+import AdminLogin from "./components/admin/AdminLogin";
+import ProtectedRoute from "./components/admin/ProtectedRoute";
+import RequestMagicLink from "./pages/RequestMagicLink";
 
 function App() {
-  const [mode, setMode] = useState("day"); // "day" o "sunset"
-
-  const toggleMode = () => {
-    setMode((prev) => (prev === "day" ? "sunset" : "day"));
-  };
-
   return (
-    <div className={`app-container ${mode}`}>
+    <div className="app-container">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/verify" element={<MagicLinkVerification />} />
           <Route path="/email" element={<EmailForm />} />
-          <Route path="/registration" element={<UserRegistration />} />
-          <Route path="/admin" element={<Admin/>}></Route>
-          <Route path="/loginAdmin" element={<LoginAdmin/>}></Route>
+          <Route path="/register" element={<UserRegistration />} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>}/>
+          <Route path="/adminlogin" element={<AdminLogin />}></Route>
         </Routes>
       </BrowserRouter>
     </div>

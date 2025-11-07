@@ -7,6 +7,7 @@ import "./Admin.css";
 export default function Admin() {
   const [photos, setPhotos] = useState([]);
   const [activeSection, setActiveSection] = useState("home");
+  const [adminName, setAdminName] = useState("Admin");
 
   useEffect(() => {
     fetch("http://localhost:3000/photos")
@@ -15,6 +16,21 @@ export default function Admin() {
       .catch((err) => console.error("Error fetching photos:", err));
   }, []);
 
+  useEffect(() => {
+    const storedName = localStorage.getItem("adminName");
+    if (storedName && storedName.trim() !== "") {
+      setAdminName(storedName);
+    } else {
+      setAdminName("Admin");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminName");
+    window.location.href = "/adminlogin";
+  };
+
   return (
     <div data-theme="light" className="drawer drawer-open admin-layout">
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -22,7 +38,7 @@ export default function Admin() {
         <div className="p-6">
           {activeSection === "home" && (
             <>
-              <h1 className="text-2xl font-bold mb-4">Bienvenido, Admin</h1>
+              <h1 className="text-2xl font-bold mb-4">Bienvenido, {adminName}</h1>
               <p className="text-gray-600">Desde este panel puedes gestionar fotos, usuarios, facts y ver estadísticas.</p>
             </>
           )}
@@ -114,6 +130,15 @@ export default function Admin() {
           <button onClick={() => setActiveSection("settings")} className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Settings">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="inline-block size-4 my-1.5"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
             <span className="is-drawer-close:hidden">Settings</span>
+          </button>
+        </li>
+
+        <li>
+          <button onClick={handleLogout} className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Logout">
+            <svg xmlns="http://www.w3.org/2000/svg" className="inline-block size-4 my-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10v1" />
+            </svg>
+            <span className="is-drawer-close:hidden">Cerrar sesión</span>
           </button>
         </li>
 
