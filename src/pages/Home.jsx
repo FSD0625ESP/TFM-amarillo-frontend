@@ -71,6 +71,9 @@ export default function Home() {
     const interval = setInterval(() => {
       index = (index + 1) % slides.length;
       window.location.hash = slides[index];
+      setTimeout(() => {
+        history.replaceState(null, "", " ");
+      }, 0);
     }, 5000);
     return () => clearInterval(interval);
   }, [highlighted, slideCount]);

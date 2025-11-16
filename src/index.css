@@ -1,43 +1,77 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* ===========================
+   Paleta de colores global
+=========================== */
+
+/* Día */
 :root {
-  /* Día - piedra clara y dorado Gaudí */
   --bg: #fffdf8;
   --text: #4b3621; /* marrón piedra */
   --accent: #d6a461; /* dorado cálido */
   --accent-hover: #c9954a;
 }
 
+/* Atardecer */
 [data-theme="sunset"] {
-  /* Atardecer - tonos terracota y violeta */
-  --bg: #4b3621;
-  --text: #f3ede1;
+  --bg: #1c1b2a; /* fondo profundo */
+  --text: #f3ede1; /* texto claro */
   --accent: #f4a261; /* naranja atardecer */
   --accent-hover: #e76f51;
 }
 
-/* Paletas dinámicas */
-.theme-day {
-  --bg: var(--bg-day);
-  --text: var(--text-day);
-  --accent: var(--accent-day);
-  --highlight: var(--highlight-day);
-}
-.theme-sunset {
-  --bg: var(--bg-sunset);
-  --text: var(--text-sunset);
-  --accent: var(--accent-sunset);
-  --highlight: var(--highlight-sunset);
-}
+/* ===========================
+   Estilos globales
+=========================== */
 
+html,
 body {
-  font-family: "Poppins", sans-serif;
   margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
   background-color: var(--bg);
   color: var(--text);
-  transition: all 0.4s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  min-height: 100vh;
 }
+
+/* Contenedor principal */
+.app-container {
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ===========================
+   Botón flotante modo
+=========================== */
+
+.mode-toggle {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  padding: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, background 0.3s ease;
+  z-index: 9999;
+}
+
+.mode-toggle:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* ===========================
+  Layouts y elementos comunes
+=========================== */
 
 .container {
   max-width: 1000px;
@@ -50,7 +84,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--highlight);
+  background-color: var(--accent);
   color: white;
   padding: 1rem 2rem;
   border-radius: 10px;
@@ -75,7 +109,10 @@ body {
   font-weight: bold;
 }
 
-/* Barra de progreso */
+/* ===========================
+  Barra de progreso
+=========================== */
+
 .progress-container {
   text-align: center;
   margin-bottom: 2rem;
@@ -91,9 +128,13 @@ body {
   background-color: var(--accent);
   height: 100%;
   border-radius: 10px;
+  transition: width 0.5s ease;
 }
 
-/* Carrusel */
+/* ===========================
+   Carousel
+=========================== */
+
 .carousel {
   display: flex;
   align-items: center;
@@ -117,7 +158,10 @@ body {
   cursor: pointer;
 }
 
-/* Botones */
+/* ===========================
+   Botones
+=========================== */
+
 .btn-primary {
   background-color: var(--accent);
   color: white;
@@ -126,7 +170,13 @@ body {
   border-radius: 8px;
   cursor: pointer;
   margin: 0.5rem;
+  transition: background-color 0.3s ease;
 }
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
 .btn-secondary {
   background-color: var(--text);
   color: white;
@@ -136,22 +186,33 @@ body {
   cursor: pointer;
 }
 
-/* Footer */
+/* ===========================
+  Footer
+=========================== */
+
 .footer {
   display: flex;
   justify-content: space-around;
   margin-top: 3rem;
   padding: 1rem 0;
-  background-color: var(--highlight);
+  background-color: var(--accent);
   color: white;
   border-radius: 10px;
 }
+
 .footer a {
   color: white;
   text-decoration: none;
 }
 
-/* Sobrescribe el fondo naranja del menú lateral de Admin */
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* ===========================
+  Admin Layout (de tu rama)
+=========================== */
+
 .admin-layout .menu li > * {
   background: transparent !important;
   border-radius: 0 !important;

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Navigate } from "react-router-dom";
-import "./AdminLogin.css"; 
+import "./AdminLogin.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -13,15 +15,15 @@ function AdminLogin() {
   const navigate = useNavigate();
 
   if (localStorage.getItem("adminToken")) {
-  return <Navigate to="/admin" replace />;
-}
+    return <Navigate to="/admin" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/admins/login", {
+      const res = await axios.post(`${API_URL}/admins/login`, {
         username: username,
         password,
       });
@@ -62,12 +64,28 @@ function AdminLogin() {
             aria-label="Mostrar/Ocultar contraseña"
           >
             {showPassword ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/>
-                <circle cx="12" cy="12" r="2"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z" />
+                <circle cx="12" cy="12" r="2" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M17.94 17.94A10.94 10.94 0 0112 20C7 20 2.73 16.11 1 12a16.88 16.88 0 014-5.73" />
                 <path d="M3 3l18 18" />
                 <path d="M10.58 10.58A2 2 0 0012 14a2 2 0 001.42-3.42" />
@@ -77,7 +95,9 @@ function AdminLogin() {
             )}
           </span>
         </div>
-        <button type="submit" disabled={loading}>{loading ? "Cargando..." : "Entrar"}</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Cargando..." : "Entrar"}
+        </button>
       </form>
       {error && <p className="error">{error}</p>}
     </div>
