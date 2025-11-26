@@ -54,6 +54,7 @@ form {
 }
 
 input[type="text"],
+input[type="name"],
 input[type="email"],
 input[type="number"],
 input[type="file"],

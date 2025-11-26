@@ -13,7 +13,7 @@ export default function EmailForm() {
     setMessage("");
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/magiclink`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/emails/send-magic-link`, {
         email,
       });
       setMessage("✅ Te hemos enviado un enlace mágico a tu correo.");

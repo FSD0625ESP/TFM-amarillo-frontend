@@ -36,7 +36,7 @@
   box-shadow: 0 0 6px rgba(255, 122, 31, 0.3);
 }
 
-button {
+.login-container button {
   background: linear-gradient(90deg, #ff8b3d, #ffb347);
   color: #fff;
   font-weight: bold;
@@ -47,12 +47,12 @@ button {
   transition: background 0.3s ease, transform 0.2s ease;
 }
 
-button:hover {
+.login-container button:hover {
   background: linear-gradient(90deg, #ff9a3d, #ffc27c);
   transform: scale(1.03);
 }
 
-button:disabled {
+.login-container button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
@@ -105,4 +105,30 @@ button:disabled {
   .login-container h2 {
     font-size: 1.5rem;
   }
+}
+
+/* Password input and toggle icon styles */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 2.5rem; /* Adds space for the icon */
+  background-color: #fff; /* Ensure background remains consistent */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  cursor: pointer;
+  color: #555;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

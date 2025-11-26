@@ -2,20 +2,26 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
-import EmailForm from "./pages/EmailForm"; // Página donde el usuario escribe solo su email
-import MagicLinkVerification from "./pages/MagicLinkVerification"; // Página de verificación del enlace mágico
-import UserRegistration from "./pages/UserRegistration"; // Página donde el usuario completa los datos para subir su primera foto o fotos
-import UserRegistrationSecondPage from "./pages/UserRegistrationSecondPage"; // Página con NOMBRE, MAIL, PAIS precargados en los datos del usuario que quiere subir más fotos
+
+// 🔹 Magic Link / Registro
+import EmailForm from "./pages/EmailForm";
+import MagicLinkVerification from "./pages/MagicLinkVerification";
+import UserRegistration from "./pages/UserRegistration";
+import RequestMagicLink from "./pages/RequestMagicLink";
+
+// 🔹 Admin
+import Admin from "./pages/Admin";
+import AdminLogin from "./components/admin/AdminLogin";
+import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 import "./App.css";
 
 function App() {
-  // Leer el modo guardado o usar "day" por defecto
+  // 🔸 Theme Mode (viene de MAIN)
   const [mode, setMode] = useState(
     () => localStorage.getItem("themeMode") || "day"
   );
 
-  // Guardar el modo en localStorage cada vez que cambie
   useEffect(() => {
     localStorage.setItem("themeMode", mode);
     document.documentElement.setAttribute("data-theme", mode);
@@ -26,14 +32,29 @@ function App() {
     setMode((prev) => (prev === "day" ? "sunset" : "day"));
   };
 
+  // --- Rutas ---
   return (
     <div className={`app-container ${mode}`}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/verify" element={<MagicLinkVerification />} />
+          <Route path="/" element={<Home toggleMode={toggleMode} />} />
+
+          {/* Magic Link */}
           <Route path="/email" element={<EmailForm />} />
-          <Route path="/registration" element={<UserRegistration />} />
+          <Route path="/verify" element={<MagicLinkVerification />} />
+          <Route path="/register" element={<UserRegistration />} />
+          <Route path="/magic" element={<RequestMagicLink />} />
+
+          {/* Admin */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/adminlogin" element={<AdminLogin />} />
         </Routes>
       </BrowserRouter>
     </div>

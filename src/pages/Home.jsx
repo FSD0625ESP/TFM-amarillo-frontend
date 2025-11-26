@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import PhotoCarousel from "../components/PhotoCarousel";
 import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
+import { getHighlightedPhotos } from "../services/photoService";
 
 export default function Home() {
   const [theme, setTheme] = useState("day");
@@ -33,6 +34,49 @@ export default function Home() {
   const toggleTheme = () => {
     setTheme((prev) => (prev === "day" ? "sunset" : "day"));
   };
+
+  //logica de las fotos del carrousel
+  const [highlighted, setHighlighted] = useState(null);
+  const [slideCount, setSlideCount] = useState(0);
+
+  useEffect(() => {
+    const fetchHighlighted = async () => {
+      try {
+        const data = await getHighlightedPhotos();
+        setHighlighted(data);
+        const slides = [
+          data?.oldestByYear?.imageUrl,
+          data?.newestUploaded?.imageUrl,
+          data?.mostLiked?.imageUrl,
+        ].filter(Boolean);
+        setSlideCount(slides.length);
+        console.log("✅ Highlighted seteado correctamente:", data);
+        console.log("🔍 URLs recibidas:", {
+          oldest: data?.oldestByYear?.imageUrl,
+          newest: data?.newestUploaded?.imageUrl,
+          mostLiked: data?.mostLiked?.imageUrl,
+        });
+      } catch (error) {
+        console.error("Error al cargar fotos destacadas:", error);
+      }
+    };
+    fetchHighlighted();
+  }, []);
+
+  // autoplay del carrusel
+  useEffect(() => {
+    if (!highlighted || slideCount === 0) return;
+    const slides = Array.from({ length: slideCount }, (_, i) => `#slide-${i + 1}`);
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % slides.length;
+      window.location.hash = slides[index];
+      setTimeout(() => {
+        history.replaceState(null, "", " ");
+      }, 0);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [highlighted, slideCount]);
 
   return (
     <main className="home">
@@ -84,7 +128,7 @@ export default function Home() {
           </p>
 
           <div className="intro-cta">
-            <Link to="/email" className="btn btn-primary">
+            <Link to="/" className="btn btn-primary">
               Colabora con tu foto
             </Link>
             <Link to="/mosaic" className="btn-link">
@@ -127,30 +171,63 @@ export default function Home() {
       {/* 🖼️ SECCIÓN CARRUSEL */}
       <section className="carousel-section">
         <h2 className="section-title">Destacados del mosaico</h2>
-        <PhotoCarousel
-          images={[
-            {
-              src: "",
-              alt: "Fotografía más antigua del mosaico",
-              title: "La más antigua",
-              description: "Capturada en 1885 por un visitante desconocido.",
-            },
-            {
-              src: "",
-              alt: "Fotografía más reciente del mosaico",
-              title: "La más reciente",
-              description:
-                "Tomada hace solo unos días por un colaborador local.",
-            },
-            {
-              src: "",
-              alt: "Fotografía más votada",
-              title: "La más votada",
-              description: "Favorita entre los visitantes de todo el mundo.",
-            },
-          ]}
-        />
+        {!highlighted ? (
+          <p>Cargando...</p>
+        ) : (
+          <div
+            key={JSON.stringify(highlighted)}
+            className="carousel w-full max-w-3xl mx-auto rounded-lg shadow-lg overflow-x-auto"
+          >
+            <div className="carousel-inner flex w-full">
+              {(() => {
+                const rawSlides = [
+                  {
+                    title: "La más antigua",
+                    description: `Capturada en ${highlighted.oldestByYear?.year || "año desconocido"}.`,
+                    src: highlighted.oldestByYear?.imageUrl,
+                  },
+                  {
+                    title: "La más reciente",
+                    description: "Tomada recientemente por un colaborador.",
+                    src: highlighted.newestUploaded?.imageUrl,
+                  },
+                  {
+                    title: "La más votada",
+                    description: `Con ${highlighted.mostLiked?.likes || 0} likes.`,
+                    src: highlighted.mostLiked?.imageUrl,
+                  },
+                ].filter(slide => !!slide.src);
+
+                return rawSlides.map((slide, index) => {
+                  const id = `slide-${index + 1}`;
+                  const total = rawSlides.length;
+                  const prev = `#slide-${(index - 1 + total) % total + 1}`;
+                  const next = `#slide-${(index + 1) % total + 1}`;
+
+                  return (
+                    <div key={id} id={id} className="carousel-item relative w-full">
+                      <img
+                        src={slide.src}
+                        alt={slide.title}
+                        className="w-full object-contain max-h-[500px]"
+                      />
+                      <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-4">
+                        <h3 className="text-lg font-semibold">{slide.title}</h3>
+                        <p>{slide.description}</p>
+                      </div>
+                      <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+                        <a href={prev} className="btn btn-circle">❮</a>
+                        <a href={next} className="btn btn-circle">❯</a>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        )}
       </section>
+
       {/* 🔻 FOOTER */}
       <footer className="footer">
         <p>

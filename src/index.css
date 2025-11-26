@@ -1,5 +1,5 @@
-@plugin "daisyui";
 @import "tailwindcss";
+@plugin "daisyui";
 
 /* ===========================
    Paleta de colores global
@@ -199,10 +199,15 @@ body {
   color: white;
   border-radius: 10px;
 }
+
 .footer a {
   color: white;
   text-decoration: none;
 }
+
 .footer a:hover {
   text-decoration: underline;
 }
+
+/* ===========================
+  Admin Layout (de tu rama)

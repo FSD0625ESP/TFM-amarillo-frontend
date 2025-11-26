@@ -1,85 +1,122 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useSearchParams } from "react-router-dom";
+import Modal from "react-modal";
 import "./UserRegistration.css";
-import { registerUser } from "../services/CreateUser";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import SuccessScreen from "../components/SuccessScreen";
+import {
+  FacebookShareButton,
+  TwitterShareButton,
+  WhatsappShareButton,
+  FacebookIcon,
+  TwitterIcon,
+  WhatsappIcon,
+} from "react-share";
+
+const shareUrl = "https://tusitiooficial.com";
+const title = "¡Acabo de subir mi foto al Proyecto Amarillo 💛!";
+
+Modal.setAppElement("#root");
 
 function UserRegistration() {
-  const verifiedEmail = localStorage.getItem("verifiedEmail");
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
+  const [email, setEmail] = useState("");
+  const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
-    email: verifiedEmail || "",
-    country: "",
-    photos: [],
-    story: "",
     age: "",
+    country: "",
+    story: "",
     photoYear: "",
-    terms: false,
+    title: "",
+    photos: [],
   });
 
-  const [sending, setSending] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [colaboradorNum, setColaboradorNum] = useState(null);
-  const [errores, setErrores] = useState([]);
-  const [photoYear, setPhotoYear] = useState(null);
+  // 🔍 Verificar token
+  useEffect(() => {
+    const verifyToken = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/emails/verify-token?token=${token}`
+        );
+        setEmail(res.data.email);
+        setVerified(true);
+      } catch {
+        setMessage("El enlace ha expirado o no es válido.");
+      }
+    };
+    verifyToken();
+  }, [token]);
 
+  // ✏️ Manejar inputs
   const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
-    if (type === "checkbox") {
-      setFormData({ ...formData, [name]: checked });
-    } else if (type === "file") {
+    const { name, value, files } = e.target;
+    if (name === "photos") {
       setFormData({ ...formData, photos: Array.from(files) });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
+  // 🚀 Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSending(true);
-    setErrores([]);
+    setLoading(true);
+    setMessage("");
+
+    const data = new FormData();
+    data.append("email", email); // 👈 owner de la foto
+    data.append("name", formData.name);
+    data.append("age", formData.age);
+    data.append("country", formData.country);
+    data.append("story", formData.story);
+    data.append("year", formData.photoYear);
+    data.append("title", formData.title);
+    formData.photos.forEach((file) => data.append("photos", file));
 
     try {
-      const formPayload = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === "photos")
-          value.forEach((foto) => formPayload.append("photos", foto));
-        else formPayload.append(key, value);
-      });
-
-      const response = await registerUser(formPayload);
-      setColaboradorNum(response.data.colaboradorNum);
-      setSubmitted(true);
+      const res = await axios.post(
+        "http://localhost:3000/emails/complete",
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      setMessage(res.data.message || "Foto subida correctamente.");
+      setModalOpen(true);
     } catch (error) {
-      console.error("❌ Error al registrar usuario:", error);
-      setErrores([{ path: "general", msg: "Error al registrar usuario." }]);
+      console.error(error);
+      setMessage(
+        error.response?.data?.message || "Error al subir la fotografía."
+      );
     } finally {
-      setSending(false);
+      setLoading(false);
     }
   };
 
-  if (submitted) {
-    return <SuccessScreen colaboradorNum={colaboradorNum} />;
-  }
+  if (!verified) return <p>{message || "Verificando enlace..."}</p>;
 
   return (
     <div className="registro-container">
-      <h2>Formulario de colaboración</h2>
+      <h2>Completa tu registro</h2>
+
       <form onSubmit={handleSubmit}>
+        <input type="email" value={email} disabled />
+
         <input
           type="text"
           name="name"
-          placeholder="Nombre"
-          value={formData.name}
+          placeholder="Nombre completo"
           onChange={handleChange}
           required
         />
         <input
           type="number"
           name="age"
-          placeholder="Edad (años)"
-          value={formData.age}
+          placeholder="Edad"
           onChange={handleChange}
           required
         />
@@ -87,50 +124,81 @@ function UserRegistration() {
           type="text"
           name="country"
           placeholder="País"
-          value={formData.country}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="story"
+          placeholder="Cuéntanos tu historia"
+          onChange={handleChange}
+          required
+        ></textarea>
+
+        <input
+          type="number"
+          name="photoYear"
+          placeholder="Año de la foto"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="title"
+          placeholder="Título de la foto"
           onChange={handleChange}
           required
         />
         <input
           type="file"
           name="photos"
-          multiple
           accept="image/*"
           onChange={handleChange}
           required
         />
-        <textarea
-          name="story"
-          placeholder="Tu historia"
-          value={formData.story}
-          onChange={handleChange}
-        />
-        <DatePicker
-          selected={photoYear}
-          onChange={(date) => {
-            setPhotoYear(date);
-            setFormData({ ...formData, photoYear: date.getFullYear() });
-          }}
-          showYearPicker
-          dateFormat="yyyy"
-          placeholderText="Año de la foto"
-          className="year-picker"
-        />
-        <label>
-          <input
-            type="checkbox"
-            name="terms"
-            checked={formData.terms}
-            onChange={handleChange}
-            required
-          />
-          Acepto los términos y condiciones
-        </label>
 
-        <button type="submit" disabled={sending}>
-          {sending ? "Enviando..." : "Finalizar"}
+        <button type="submit" disabled={loading}>
+          {loading ? "Subiendo..." : "Registrar"}
         </button>
       </form>
+
+      {message && <p className="mensaje">{message}</p>}
+
+      {/* ✅ Modal de confirmación */}
+      <Modal
+        isOpen={modalOpen}
+        onRequestClose={() => setModalOpen(false)}
+        contentLabel="Registro Completo"
+        className="modal-content"
+        overlayClassName="modal-overlay"
+      >
+        <h2>🎉 ¡Felicidades, {formData.name}! 🎉</h2>
+        <p>
+          Tu foto ha sido añadida al mosaico colaborativo de la Sagrada Família.
+        </p>
+        <p className="success-subtext">
+          Gracias por formar parte de este homenaje colectivo 💛
+        </p>
+
+        {/* 🌍 Botones de compartir */}
+        <div className="share-container">
+          <FacebookShareButton url={shareUrl} quote={title}>
+            <FacebookIcon size={40} round />
+          </FacebookShareButton>
+          <TwitterShareButton url={shareUrl} title={title}>
+            <TwitterIcon size={40} round />
+          </TwitterShareButton>
+          <WhatsappShareButton url={shareUrl} title={title}>
+            <WhatsappIcon size={40} round />
+          </WhatsappShareButton>
+        </div>
+
+        <div className="modal-buttons">
+          <button onClick={() => (window.location.href = "/home")}>
+            Ver mosaico
+          </button>
+          <button onClick={() => setModalOpen(false)}>Cerrar</button>
+        </div>
+      </Modal>
     </div>
   );
 }
