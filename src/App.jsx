@@ -27,6 +27,7 @@ function App() {
     document.documentElement.setAttribute("data-theme", mode);
   }, [mode]);
 
+  // Alternar entre modos
   const toggleMode = () => {
     setMode((prev) => (prev === "day" ? "sunset" : "day"));
   };

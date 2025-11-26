@@ -211,10 +211,3 @@ body {
 
 /* ===========================
   Admin Layout (de tu rama)
-=========================== */
-
-.admin-layout .menu li > * {
-  background: transparent !important;
-  border-radius: 0 !important;
-  color: var(--text);
-}

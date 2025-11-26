@@ -27,11 +27,8 @@ export default function EmailForm() {
 
   return (
     <div className="email-form-container">
-      <h2>Acceso al proyecto colaborativo</h2>
-      <p>
-        Introduce tu correo y te enviaremos un enlace mágico para continuar ✨
-      </p>
-
+      <h2>Para subir tu foto necesitamos tu correo electrónico</h2>
+      <p>Introduce tu correo aquí</p>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
