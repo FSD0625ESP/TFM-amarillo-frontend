@@ -6,20 +6,19 @@ import iconNacimiento from "../assets/iconNacimiento.png";
 import iconPasion from "../assets/iconPasion.png";
 import FactSection from "../components/FactSection";
 import { Link } from "react-router-dom";
-import PhotoCarousel from "../components/PhotoCarousel";
 import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
 
 export default function Home() {
   const [theme, setTheme] = useState("day");
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     fotos: 1523,
     colaboradores: 847,
     paises: 27,
   });
 
-  // Detectar automáticamente la hora local
+  // Theme automático por hora
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 21 || hour < 6) setTheme("sunset");
@@ -31,50 +30,40 @@ export default function Home() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "day" ? "sunset" : "day"));
-  };
-
-  //logica de las fotos del carrousel
+  // Fotos destacadas
   const [highlighted, setHighlighted] = useState(null);
   const [slideCount, setSlideCount] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchHighlighted = async () => {
       try {
         const data = await getHighlightedPhotos();
         setHighlighted(data);
+
         const slides = [
           data?.oldestByYear?.imageUrl,
           data?.newestUploaded?.imageUrl,
           data?.mostLiked?.imageUrl,
         ].filter(Boolean);
+
         setSlideCount(slides.length);
-        console.log("✅ Highlighted seteado correctamente:", data);
-        console.log("🔍 URLs recibidas:", {
-          oldest: data?.oldestByYear?.imageUrl,
-          newest: data?.newestUploaded?.imageUrl,
-          mostLiked: data?.mostLiked?.imageUrl,
-        });
       } catch (error) {
         console.error("Error al cargar fotos destacadas:", error);
       }
     };
+
     fetchHighlighted();
   }, []);
 
-  // autoplay del carrusel
+  // Autoplay SIN hash, SIN scroll //
   useEffect(() => {
     if (!highlighted || slideCount === 0) return;
-    const slides = Array.from({ length: slideCount }, (_, i) => `#slide-${i + 1}`);
-    let index = 0;
+
     const interval = setInterval(() => {
-      index = (index + 1) % slides.length;
-      window.location.hash = slides[index];
-      setTimeout(() => {
-        history.replaceState(null, "", " ");
-      }, 0);
+      setCurrentSlide((prev) => (prev + 1) % slideCount);
     }, 5000);
+
     return () => clearInterval(interval);
   }, [highlighted, slideCount]);
 
@@ -83,7 +72,6 @@ export default function Home() {
       {/* Botón para alternar el modo manualmente */}
       <button
         className="theme-toggle"
-        //onClick={toggleTheme}
         aria-label="Cambiar entre modo día y atardecer"
       >
         <img
@@ -96,12 +84,14 @@ export default function Home() {
           className="theme-icon"
         />
       </button>
+
       {/* FACTS */}
       <section className="fact-section" aria-labelledby="fact-title">
         <div className="fact-inner">
           <FactSection />
         </div>
       </section>
+
       {/* INTRODUCCIÓN */}
       <section className="intro-section" aria-labelledby="intro-title">
         <div className="intro-inner">
@@ -112,15 +102,12 @@ export default function Home() {
           <p className="intro-text">
             Con motivo de la inauguración de la Sagrada Família en 2026, hemos
             querido rendir nuestro pequeño homenaje con este proyecto
-            colaborativo, nacido como trabajo final de Máster en Full Stack
-            Development.
+            colaborativo.
           </p>
 
           <p className="intro-text">
             Inspirados por el espíritu participativo de Barcelona, invitamos a
-            cualquier persona a aportar su propia fotografía de la Sagrada
-            Família para formar parte del mosaico colaborativo que reúna todas
-            nuestras miradas y memorias.
+            cualquier persona a aportar su propia fotografía.
           </p>
 
           <p className="intro-tagline">
@@ -137,6 +124,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
       {/* HERO MOSAICO */}
       <section className="hero-preview">
         <img
@@ -145,10 +133,10 @@ export default function Home() {
           loading="lazy"
         />
       </section>
-      {/* SECCIÓN BARRA DE PROGRESO DEL MOSAICO */}
+
       <MosaicProgressBar />
 
-      {/* 📊 SECCIÓN DE ESTADÍSTICAS */}
+      {/* ESTADÍSTICAS */}
       <section className="stats-section">
         <h3 className="stats-title">Nuestra comunidad en cifras</h3>
         <div className="stats-grid">
@@ -168,67 +156,96 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/* 🖼️ SECCIÓN CARRUSEL */}
+
+      {/* CARRUSEL SIN HASH */}
       <section className="carousel-section">
         <h2 className="section-title">Destacados del mosaico</h2>
+
         {!highlighted ? (
           <p>Cargando...</p>
         ) : (
-          <div
-            key={JSON.stringify(highlighted)}
-            className="carousel w-full max-w-3xl mx-auto rounded-lg shadow-lg overflow-x-auto"
-          >
-            <div className="carousel-inner flex w-full">
-              {(() => {
-                const rawSlides = [
-                  {
-                    title: "La más antigua",
-                    description: `Capturada en ${highlighted.oldestByYear?.year || "año desconocido"}.`,
-                    src: highlighted.oldestByYear?.imageUrl,
-                  },
-                  {
-                    title: "La más reciente",
-                    description: "Tomada recientemente por un colaborador.",
-                    src: highlighted.newestUploaded?.imageUrl,
-                  },
-                  {
-                    title: "La más votada",
-                    description: `Con ${highlighted.mostLiked?.likes || 0} likes.`,
-                    src: highlighted.mostLiked?.imageUrl,
-                  },
-                ].filter(slide => !!slide.src);
+          (() => {
+            const rawSlides = [
+              {
+                title: "La más antigua",
+                description: `Capturada en ${
+                  highlighted.oldestByYear?.year || "año desconocido"
+                }.`,
+                src: highlighted.oldestByYear?.imageUrl,
+              },
+              {
+                title: "La más reciente",
+                description: "Tomada recientemente por un colaborador.",
+                src: highlighted.newestUploaded?.imageUrl,
+              },
+              {
+                title: "La más votada",
+                description: `Con ${highlighted.mostLiked?.likes || 0} likes.`,
+                src: highlighted.mostLiked?.imageUrl,
+              },
+            ].filter((s) => !!s.src);
 
-                return rawSlides.map((slide, index) => {
-                  const id = `slide-${index + 1}`;
-                  const total = rawSlides.length;
-                  const prev = `#slide-${(index - 1 + total) % total + 1}`;
-                  const next = `#slide-${(index + 1) % total + 1}`;
+            return (
+              <div className="w-full max-w-3xl mx-auto rounded-lg shadow-lg overflow-hidden relative">
+                {/* Imagen */}
+                <div className="relative w-full h-[500px] flex items-center justify-center bg-black/5">
+                  <img
+                    src={rawSlides[currentSlide].src}
+                    alt={rawSlides[currentSlide].title}
+                    className="w-full h-full object-contain"
+                  />
 
-                  return (
-                    <div key={id} id={id} className="carousel-item relative w-full">
-                      <img
-                        src={slide.src}
-                        alt={slide.title}
-                        className="w-full object-contain max-h-[500px]"
-                      />
-                      <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-4">
-                        <h3 className="text-lg font-semibold">{slide.title}</h3>
-                        <p>{slide.description}</p>
-                      </div>
-                      <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                        <a href={prev} className="btn btn-circle">❮</a>
-                        <a href={next} className="btn btn-circle">❯</a>
-                      </div>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </div>
+                  {/* Texto superpuesto */}
+                  <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-4">
+                    <h3 className="text-lg font-semibold">
+                      {rawSlides[currentSlide].title}
+                    </h3>
+                    <p>{rawSlides[currentSlide].description}</p>
+                  </div>
+
+                  {/* Flechas de navegación */}
+                  <button
+                    onClick={() =>
+                      setCurrentSlide(
+                        (currentSlide - 1 + rawSlides.length) % rawSlides.length
+                      )
+                    }
+                    className="btn btn-circle absolute left-5 top-1/2 -translate-y-1/2"
+                  >
+                    ❮
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setCurrentSlide((currentSlide + 1) % rawSlides.length)
+                    }
+                    className="btn btn-circle absolute right-5 top-1/2 -translate-y-1/2"
+                  >
+                    ❯
+                  </button>
+                </div>
+
+                {/* Indicadores */}
+                <div className="flex justify-center gap-2 py-4 bg-base-100">
+                  {rawSlides.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentSlide(i)}
+                      className={`btn btn-xs ${
+                        i === currentSlide ? "btn-primary" : ""
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()
         )}
       </section>
 
-      {/* 🔻 FOOTER */}
+      {/* FOOTER */}
       <footer className="footer">
         <p>
           © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API
@@ -242,6 +259,7 @@ export default function Home() {
           </a>
         </nav>
       </footer>
+
       <LiveCamera />
     </main>
   );
