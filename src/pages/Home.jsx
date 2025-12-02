@@ -115,7 +115,7 @@ export default function Home() {
           </p>
 
           <div className="intro-cta">
-            <Link to="/" className="btn btn-primary">
+            <Link to="/email" className="btn btn-primary">
               Colabora con tu foto
             </Link>
             <Link to="/mosaic" className="btn-link">
@@ -247,17 +247,15 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className="footer">
-        <p>
-          © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API
-          — Desarrollado por el equipo Full Stack 2025.
-        </p>
-        <nav className="footer-links">
+        <p className="footer-text">
           <a href="/about">Sobre el proyecto</a>
           <a href="/api/docs">API Docs</a>
           <a href="https://github.com" target="_blank" rel="noreferrer">
             GitHub
           </a>
-        </nav>
+          </p>
+          © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API
+          — Desarrollado por el equipo Full Stack 2025.
       </footer>
 
       <LiveCamera />
