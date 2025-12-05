@@ -5,6 +5,7 @@ import FactList from "../components/admin/FactList.jsx";
 import UserList from "../components/admin/UserList";
 import "./Admin.css";
 import axios from "axios";
+import useOnlineUsers from "../hooks/useOnlineUsers";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -29,16 +30,20 @@ export default function Admin() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState("");
   const [photoToDelete, setPhotoToDelete] = useState(null);
-
+  const { count: onlineCount, users: onlineUsers } = useOnlineUsers();
   const getPhotoId = (photo) => photo?._id || photo?.id;
 
   const applyPhotoUpdate = (updatedPhoto) => {
     const updatedId = getPhotoId(updatedPhoto);
     setPhotos((prev) =>
-      prev.map((photo) => (getPhotoId(photo) === updatedId ? updatedPhoto : photo))
+      prev.map((photo) =>
+        getPhotoId(photo) === updatedId ? updatedPhoto : photo
+      )
     );
     setUserPhotos((prev) =>
-      prev.map((photo) => (getPhotoId(photo) === updatedId ? updatedPhoto : photo))
+      prev.map((photo) =>
+        getPhotoId(photo) === updatedId ? updatedPhoto : photo
+      )
     );
   };
 
@@ -247,16 +252,15 @@ export default function Admin() {
       };
 
       const photoId = getPhotoId(editingPhoto);
-      const { data } = await axios.put(
-        `${API_URL}/photos/${photoId}`,
-        payload
-      );
+      const { data } = await axios.put(`${API_URL}/photos/${photoId}`, payload);
 
       applyPhotoUpdate(data);
       setEditingPhoto(null);
     } catch (err) {
       console.error("Error editando foto:", err);
-      setEditError(err.response?.data?.message || "No se pudo guardar los cambios.");
+      setEditError(
+        err.response?.data?.message || "No se pudo guardar los cambios."
+      );
     } finally {
       setSavingEdit(false);
     }
@@ -278,10 +282,33 @@ export default function Admin() {
               <h1 className="text-2xl font-bold mb-4">
                 Bienvenido, {adminName}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-3">
                 Desde este panel puedes gestionar fotos, usuarios, facts y ver
                 estadísticas.
               </p>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">
+                  Usuarios online ahora:
+                </span>
+                <span className="badge badge-success badge-outline">
+                  {onlineCount}
+                </span>
+                {onlineUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                    {onlineUsers.slice(0, 5).map((u, idx) => (
+                      <span key={u.id || u.email || idx} className="badge badge-neutral">
+                        {u.email || u.id}
+                      </span>
+                    ))}
+                    {onlineUsers.length > 5 && (
+                      <span className="badge badge-ghost">
+                        +{onlineUsers.length - 5} más
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </>
           )}
           {activeSection === "fotos" && (
@@ -314,7 +341,9 @@ export default function Admin() {
                           <div className="relative">
                             <img
                               src={photo.imageUrl || photo.url}
-                              alt={`Foto subida por ${selectedUser.email || selectedUser.id}`}
+                              alt={`Foto subida por ${
+                                selectedUser.email || selectedUser.id
+                              }`}
                               className={`w-full h-48 object-cover rounded mb-2 ${
                                 photo.hidden ? "opacity-60" : ""
                               }`}
@@ -347,7 +376,9 @@ export default function Admin() {
                               className={`btn btn-sm ${
                                 photo.hidden ? "btn-success" : "btn-warning"
                               }`}
-                              disabled={togglingPhotoId === (photo._id || photo.id)}
+                              disabled={
+                                togglingPhotoId === (photo._id || photo.id)
+                              }
                               onClick={() => handleTogglePhotoVisibility(photo)}
                               type="button"
                             >
@@ -374,7 +405,9 @@ export default function Admin() {
                               className="btn btn-sm btn-error"
                               type="button"
                               onClick={() => requestDeletePhoto(photo)}
-                              disabled={deletingPhotoId === (photo._id || photo.id)}
+                              disabled={
+                                deletingPhotoId === (photo._id || photo.id)
+                              }
                             >
                               {deletingPhotoId === (photo._id || photo.id)
                                 ? "Eliminando..."
@@ -413,6 +446,7 @@ export default function Admin() {
               <UserList
                 onViewPhotos={handleViewPhotos}
                 focusUser={focusedUser}
+                onlineUsers={onlineUsers}
               />
             </div>
           )}
@@ -430,12 +464,12 @@ export default function Admin() {
         <div className="is-drawer-close:w-14 is-drawer-open:w-64 bg-base-200 flex flex-col items-start min-h-full">
           {/* Sidebar content here */}
           <ul className="menu w-full grow">
-            {/* list item */}
+            {/* HOME */}
             <li>
               <button
                 onClick={() => setActiveSection("home")}
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Homepage"
+                data-tip="Inicio"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -444,11 +478,13 @@ export default function Admin() {
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <path d="M3 9.75L12 3l9 6.75V21a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 21V9.75Z" />
-                  <path d="M9 22V12h6v10" />
+                  <path d="M3 11L12 3l9 8" />
+                  <path d="M5 10v10h5v-5h4v5h5V10" />
                 </svg>
-                <span className="is-drawer-close:hidden">Homepage</span>
+                <span className="is-drawer-close:hidden">Inicio</span>
               </button>
             </li>
 
@@ -470,9 +506,15 @@ export default function Admin() {
                   <circle cx="12" cy="7" r="4" />
                   <path d="M5.5 21a7.5 7.5 0 0 1 13 0" />
                 </svg>
-                <span className="is-drawer-close:hidden">Usuarios</span>
+                <span className="is-drawer-close:hidden flex items-center gap-2">
+                  Usuarios
+                  <span className="badge badge-success badge-sm">
+                    {onlineCount}
+                  </span>
+                </span>
               </button>
             </li>
+
 
             {/* list item */}
             <li>
@@ -494,7 +536,11 @@ export default function Admin() {
                     strokeLinejoin="round"
                     d="M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10"
                   />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 21h18"
+                  />
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -716,8 +762,7 @@ export default function Admin() {
                 className="btn"
                 onClick={() => setPhotoToDelete(null)}
                 disabled={
-                  deletingPhotoId ===
-                  (photoToDelete._id || photoToDelete.id)
+                  deletingPhotoId === (photoToDelete._id || photoToDelete.id)
                 }
               >
                 Cancelar
@@ -727,8 +772,7 @@ export default function Admin() {
                 className="btn btn-error"
                 onClick={handleConfirmDeletePhoto}
                 disabled={
-                  deletingPhotoId ===
-                  (photoToDelete._id || photoToDelete.id)
+                  deletingPhotoId === (photoToDelete._id || photoToDelete.id)
                 }
               >
                 {deletingPhotoId === (photoToDelete._id || photoToDelete.id)

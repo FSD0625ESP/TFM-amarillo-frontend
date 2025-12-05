@@ -28,6 +28,8 @@ function UserRegistrationSecondPage() {
     if (!storedUser.email) {
       alert("⚠️ No hay datos de usuario cargados. Redirigiendo al registro...");
       window.location.href = "/email";
+    } else {
+      localStorage.setItem("verifiedEmail", storedUser.email.toLowerCase());
     }
   }, [storedUser]);
 

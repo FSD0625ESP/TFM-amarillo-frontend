@@ -5,12 +5,16 @@ import heroPic from "../assets/heroPicSagradaFamilia.png";
 import iconNacimiento from "../assets/iconNacimiento.png";
 import iconPasion from "../assets/iconPasion.png";
 import FactSection from "../components/FactSection";
+import useOnlineUsers from "../hooks/useOnlineUsers";
 import { Link } from "react-router-dom";
 import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
 
 export default function Home() {
+  const { total: onlineTotal = 0, anonymousCount = 0, count: registeredOnline = 0 } =
+    useOnlineUsers();
+
   const [theme, setTheme] = useState("day");
   const [stats] = useState({
     fotos: 1523,
@@ -153,6 +157,10 @@ export default function Home() {
           <div className="stat-item">
             <span className="stat-number">{stats.paises}</span>
             <span className="stat-label">Países participantes</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">{onlineTotal || 0}</span>
+            <span className="stat-label">Personas viendo ahora</span>
           </div>
         </div>
       </section>
