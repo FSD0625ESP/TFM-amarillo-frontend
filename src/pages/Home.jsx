@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
+import EditLinkForm from "./EditLinkForm.jsx";
 
 export default function Home() {
   const [theme, setTheme] = useState("day");
@@ -17,6 +18,8 @@ export default function Home() {
     colaboradores: 847,
     paises: 27,
   });
+
+  
 
   // Theme automático por hora
   useEffect(() => {
@@ -125,7 +128,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HERO MOSAICO */}
+            {/* HERO MOSAICO */}
       <section className="hero-preview">
         <img
           src={heroPic}
@@ -135,6 +138,16 @@ export default function Home() {
       </section>
 
       <MosaicProgressBar />
+
+      {/* 🔁 Sección para ver/editar fotos si ya tienen correo registrado */}
+      <section className="edit-photos-section">
+        <h3 className="section-title">¿Ya participaste antes?</h3>
+        <p className="section-subtitle">
+          Introduce tu correo y te enviaremos un enlace mágico para ver y editar tus fotos.
+        </p>
+
+        <EditLinkForm />
+      </section>
 
       {/* ESTADÍSTICAS */}
       <section className="stats-section">
