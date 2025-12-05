@@ -9,9 +9,42 @@
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Collage Sagrada</title>
+
+    <!-- ⭐ Google Translate Init Function -->
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: "es", 
+            includedLanguages: "en,fr,it,de,pt,ja,zh-CN,ar,es,ca",
+            layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+          },
+          "google_translate_element"
+        );
+      }
+    </script>
   </head>
+
   <body>
+    <!-- ⭐ Traductor Google (ubicación visible en pantalla) -->
+    <div
+  id="google_translate_element"
+  style="
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 9999;
+  "
+></div>
+
+
+    <!-- React root -->
     <div id="root"></div>
+
+    <!-- ⭐ Script del traductor -->
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Vite main.jsx -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
