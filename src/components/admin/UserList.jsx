@@ -1,15 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-export default function UserList({ onViewPhotos, focusUser }) {
+export default function UserList({
+  onViewPhotos,
+  focusUser,
+  onlineUsers = [],
+}) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [modalUser, setModalUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const USERS_PER_PAGE = 10;
+
+  const onlineByEmail = useMemo(() => {
+    const set = new Set();
+    onlineUsers.forEach((u) => {
+      if (u?.email) set.add(u.email.toLowerCase());
+    });
+    return set;
+  }, [onlineUsers]);
+
+  const onlineById = useMemo(() => {
+    const set = new Set();
+    onlineUsers.forEach((u) => {
+      if (u?.id) set.add(String(u.id));
+    });
+    return set;
+  }, [onlineUsers]);
+
+  const isOnline = (user) => {
+    const email = user?.email ? user.email.toLowerCase() : "";
+    const id = user?._id || user?.id;
+    return onlineByEmail.has(email) || (id && onlineById.has(String(id)));
+  };
 
   useEffect(() => {
     axios
@@ -86,7 +112,7 @@ export default function UserList({ onViewPhotos, focusUser }) {
             <thead>
               <tr className="text-lg">
                 <th>Email</th>
-                <th>Fecha de registro</th>
+                <th>Estado</th>
                 <th>Fotos subidas</th>
                 <th className="text-center">Acciones</th>
               </tr>
@@ -94,6 +120,7 @@ export default function UserList({ onViewPhotos, focusUser }) {
             <tbody>
               {paginatedUsers.map((u) => {
                 const isFocused = focusUser?.email === u.email;
+                const online = isOnline(u);
                 return (
                   <tr
                     key={u._id}
@@ -102,9 +129,13 @@ export default function UserList({ onViewPhotos, focusUser }) {
                   >
                     <td>{u.email}</td>
                     <td>
-                      {u.createdAt
-                        ? new Date(u.createdAt).toLocaleString()
-                        : "-"}
+                      {online ? (
+                        <span className="badge badge-success badge-outline">
+                          En línea
+                        </span>
+                      ) : (
+                        <span className="badge badge-ghost">Offline</span>
+                      )}
                     </td>
                     <td>{u.photosCount ?? 0}</td>
                     <td className="text-center flex gap-2 justify-center">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 
@@ -15,8 +15,18 @@ import AdminLogin from "./components/admin/AdminLogin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 import "./App.css";
+import OnlinePresenceConnector from "./components/OnlinePresenceConnector";
 
 function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
+
+function AppContent() {
+  const location = useLocation();
   // 🔸 Theme Mode (viene de MAIN)
   const [mode, setMode] = useState(
     () => localStorage.getItem("themeMode") || "day"
@@ -35,28 +45,27 @@ function App() {
   // --- Rutas ---
   return (
     <div className={`app-container ${mode}`}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home toggleMode={toggleMode} />} />
+      <OnlinePresenceConnector currentPath={location.pathname} />
+      <Routes>
+        <Route path="/" element={<Home toggleMode={toggleMode} />} />
 
-          {/* Magic Link */}
-          <Route path="/email" element={<EmailForm />} />
-          <Route path="/verify" element={<MagicLinkVerification />} />
-          <Route path="/register" element={<UserRegistration />} />
-          <Route path="/magic" element={<RequestMagicLink />} />
+        {/* Magic Link */}
+        <Route path="/email" element={<EmailForm />} />
+        <Route path="/verify" element={<MagicLinkVerification />} />
+        <Route path="/register" element={<UserRegistration />} />
+        <Route path="/magic" element={<RequestMagicLink />} />
 
-          {/* Admin */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/adminlogin" element={<AdminLogin />} />
-        </Routes>
-      </BrowserRouter>
+        {/* Admin */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/adminlogin" element={<AdminLogin />} />
+      </Routes>
     </div>
   );
 }

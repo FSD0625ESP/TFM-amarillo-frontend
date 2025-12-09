@@ -45,6 +45,9 @@ function UserRegistration() {
           `http://localhost:3000/emails/verify-token?token=${token}`
         );
         setEmail(res.data.email);
+        if (res.data.email) {
+          localStorage.setItem("verifiedEmail", res.data.email.toLowerCase());
+        }
         setVerified(true);
       } catch {
         setMessage("El enlace ha expirado o no es válido.");
