@@ -3,6 +3,10 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import Modal from "react-modal";
 import "./UserRegistration.css";
+import ReactFlagsSelect from "react-flags-select";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FacebookShareButton,
   TwitterShareButton,
@@ -14,6 +18,41 @@ import {
 
 const shareUrl = "https://tusitiooficial.com";
 const title = "¡Acabo de subir mi foto al Proyecto Amarillo 💛!";
+const START_YEAR = 1882;
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from(
+  { length: CURRENT_YEAR - START_YEAR + 1 },
+  (_, idx) => CURRENT_YEAR - idx
+);
+
+const formSchema = z.object({
+  name: z.string().trim().min(1, "El nombre es obligatorio."),
+  age: z
+    .coerce.number({ invalid_type_error: "La edad debe ser numérica." })
+    .int()
+    .min(1, "La edad debe ser un número entre 1 y 115.")
+    .max(115, "La edad debe ser un número entre 1 y 115."),
+  country: z.string().min(1, "Selecciona un país de la lista."),
+  story: z.string().trim().min(1, "La historia es obligatoria."),
+  photoYear: z
+    .coerce.number({ invalid_type_error: "El año debe ser numérico." })
+    .int()
+    .min(
+      START_YEAR,
+      `El año de la foto debe ser un número entre ${START_YEAR} y ${CURRENT_YEAR}.`
+    )
+    .max(
+      CURRENT_YEAR,
+      `El año de la foto debe ser un número entre ${START_YEAR} y ${CURRENT_YEAR}.`
+    ),
+  title: z.string().trim().min(1, "El título es obligatorio."),
+  photos: z
+    .any()
+    .refine(
+      (value) => value && value.length > 0,
+      "Debes adjuntar al menos una fotografía."
+    ),
+});
 
 Modal.setAppElement("#root");
 
@@ -27,15 +66,30 @@ function UserRegistration() {
   const [message, setMessage] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    country: "",
-    story: "",
-    photoYear: "",
-    title: "",
-    photos: [],
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    clearErrors,
+    formState: { errors, touchedFields, isSubmitted },
+    watch,
+    reset,
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: {
+      name: "",
+      age: "",
+      country: "",
+      story: "",
+      photoYear: "",
+      title: "",
+      photos: [],
+    },
   });
+  const nameWatch = watch("name");
 
   // 🔍 Verificar token
   useEffect(() => {
@@ -57,30 +111,32 @@ function UserRegistration() {
   }, [token]);
 
   // ✏️ Manejar inputs
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "photos") {
-      setFormData({ ...formData, photos: Array.from(files) });
-    } else {
-      setFormData({ ...formData, [name]: value });
+  const handlePhotosChange = (e) => {
+    const files = e.target.files || [];
+    setValue("photos", files, { shouldValidate: true, shouldTouch: true });
+    clearErrors("photos");
+  };
+
+  const blockNonNumericKeys = (e) => {
+    if (["e", "E", "+", "-"].includes(e.key)) {
+      e.preventDefault();
     }
   };
 
   // 🚀 Enviar formulario
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (formValues) => {
     setMessage("");
+    setLoading(true);
 
     const data = new FormData();
     data.append("email", email); // 👈 owner de la foto
-    data.append("name", formData.name);
-    data.append("age", formData.age);
-    data.append("country", formData.country);
-    data.append("story", formData.story);
-    data.append("year", formData.photoYear);
-    data.append("title", formData.title);
-    formData.photos.forEach((file) => data.append("photos", file));
+    data.append("name", formValues.name.trim());
+    data.append("age", Number(formValues.age));
+    data.append("country", formValues.country); // código de país seleccionado
+    data.append("story", formValues.story.trim());
+    data.append("year", Number(formValues.photoYear));
+    data.append("title", formValues.title.trim());
+    Array.from(formValues.photos).forEach((file) => data.append("photos", file));
 
     try {
       const res = await axios.post(
@@ -90,6 +146,7 @@ function UserRegistration() {
       );
       setMessage(res.data.message || "Foto subida correctamente.");
       setModalOpen(true);
+      reset();
     } catch (error) {
       console.error(error);
       setMessage(
@@ -106,58 +163,104 @@ function UserRegistration() {
     <div className="registro-container">
       <h2>Completa tu registro</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <input type="email" value={email} disabled />
 
         <input
           type="text"
           name="name"
           placeholder="Nombre completo"
-          onChange={handleChange}
+          {...register("name")}
           required
         />
+        {errors.name && (isSubmitted || touchedFields.name) && (
+          <span className="error">{errors.name.message}</span>
+        )}
         <input
           type="number"
           name="age"
           placeholder="Edad"
-          onChange={handleChange}
+          min="1"
+          max="115"
+          step="1"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          onKeyDown={blockNonNumericKeys}
+          onWheel={(e) => e.preventDefault()}
+          {...register("age")}
           required
         />
-        <input
-          type="text"
-          name="country"
-          placeholder="País"
-          onChange={handleChange}
-          required
-        />
+        {errors.age && (isSubmitted || touchedFields.age) && (
+          <span className="error">{errors.age.message}</span>
+        )}
+        <div className="flag-select-wrapper">
+          <Controller
+            name="country"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <ReactFlagsSelect
+                searchable
+                selected={value}
+                onSelect={(code) => {
+                  clearErrors("country");
+                  onChange(code);
+                }}
+                placeholder="Selecciona tu país"
+              />
+            )}
+          />
+        </div>
+        {errors.country && (isSubmitted || touchedFields.country) && (
+          <span className="error">{errors.country.message}</span>
+        )}
         <textarea
           name="story"
           placeholder="Cuéntanos tu historia"
-          onChange={handleChange}
+          {...register("story")}
           required
         ></textarea>
+        {errors.story && (isSubmitted || touchedFields.story) && (
+          <span className="error">{errors.story.message}</span>
+        )}
 
-        <input
-          type="number"
+        <select
           name="photoYear"
-          placeholder="Año de la foto"
-          onChange={handleChange}
+          className="year-picker"
+          {...register("photoYear")}
           required
-        />
+        >
+          <option value="" disabled>
+            Año de la foto (desde 1882)
+          </option>
+          {YEAR_OPTIONS.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+        {errors.photoYear && (isSubmitted || touchedFields.photoYear) && (
+          <span className="error">{errors.photoYear.message}</span>
+        )}
         <input
           type="text"
           name="title"
           placeholder="Título de la foto"
-          onChange={handleChange}
+          {...register("title")}
           required
         />
+        {errors.title && (isSubmitted || touchedFields.title) && (
+          <span className="error">{errors.title.message}</span>
+        )}
         <input
           type="file"
           name="photos"
           accept="image/*"
-          onChange={handleChange}
+        onChange={handlePhotosChange}
           required
         />
+        {errors.photos && (isSubmitted || touchedFields.photos) && (
+          <span className="error">{errors.photos.message}</span>
+        )}
 
         <button type="submit" disabled={loading}>
           {loading ? "Subiendo..." : "Registrar"}
@@ -174,7 +277,7 @@ function UserRegistration() {
         className="modal-content"
         overlayClassName="modal-overlay"
       >
-        <h2>🎉 ¡Felicidades, {formData.name}! 🎉</h2>
+        <h2>🎉 ¡Felicidades, {nameWatch}! 🎉</h2>
         <p>
           Tu foto ha sido añadida al mosaico colaborativo de la Sagrada Família.
         </p>
