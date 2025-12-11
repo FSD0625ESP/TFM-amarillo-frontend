@@ -138,14 +138,13 @@ export default function UserList({
                       )}
                     </td>
                     <td>{u.photosCount ?? 0}</td>
-                    <td className="text-center flex gap-2 justify-center">
+                    <td className="text-center">
+                      <div className="flex gap-2 justify-center items-center">
                       <button
                         className="btn btn-sm btn-primary"
-                        onClick={() =>
-                          onViewPhotos({ id: u._id, email: u.email })
-                        }
+                        onClick={() => onViewPhotos(u)}
                       >
-                        Ver fotos
+                        Ver perfil
                       </button>
                       <button
                         className="btn btn-error btn-sm"
@@ -153,6 +152,7 @@ export default function UserList({
                       >
                         Eliminar
                       </button>
+                      </div>
                     </td>
                   </tr>
                 );
