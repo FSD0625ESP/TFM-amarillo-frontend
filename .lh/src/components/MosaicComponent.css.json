@@ -1,0 +1,18 @@
+{
+    "sourceFile": "src/components/MosaicComponent.css",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1765475036883,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1765475036883,
+            "name": "Commit-0",
+            "content": "/* src/components/MosaicComponent.css */\n\n.mosaic-loading,\n.mosaic-error {\n  text-align: center;\n  font-size: 1.2rem;\n  padding: 2rem;\n  opacity: 0.8;\n}\n\n/* Mosaico responsivo */\n.mosaic-grid {\n  width: 100%;\n  display: grid;\n  gap: 6px;\n  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));\n}\n\n.mosaic-tile {\n  width: 100%;\n  background: var(--bg-soft);\n  overflow: hidden;\n  border-radius: 6px;\n  height: 0;\n  padding-bottom: 100%; /* cuadrado */\n  position: relative;\n}\n\n.mosaic-tile img {\n  position: absolute;\n  inset: 0;\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  transition: transform 0.25s ease;\n}\n\n.mosaic-tile:hover img {\n  transform: scale(1.05);\n}\n"
+        }
+    ]
+}

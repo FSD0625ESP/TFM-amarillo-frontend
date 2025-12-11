@@ -1,0 +1,55 @@
+/* src/pages/Mosaic.css */
+
+.mosaic-page {
+  width: 100%;
+  min-height: 100vh;
+  padding-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.mosaic-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding: 0 1.5rem;
+}
+
+.mosaic-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-color-strong);
+}
+
+.mosaic-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.mosaic-container {
+  width: 100%;
+  max-width: 1400px;
+  padding: 1rem 2rem 4rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .mosaic-title {
+    font-size: 1.9rem;
+  }
+
+  .mosaic-subtitle {
+    font-size: 1.05rem;
+  }
+
+  .mosaic-container {
+    padding: 1rem;
+  }
+}

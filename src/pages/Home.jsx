@@ -12,8 +12,11 @@ import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
 
 export default function Home() {
-  const { total: onlineTotal = 0, anonymousCount = 0, count: registeredOnline = 0 } =
-    useOnlineUsers();
+  const {
+    total: onlineTotal = 0,
+    anonymousCount = 0,
+    count: registeredOnline = 0,
+  } = useOnlineUsers();
 
   const [theme, setTheme] = useState("day");
   const [stats] = useState({
@@ -131,11 +134,14 @@ export default function Home() {
 
       {/* HERO MOSAICO */}
       <section className="hero-preview">
-        <img
-          src={heroPic}
-          alt="Vista previa del mosaico colaborativo de la Sagrada Família"
-          loading="lazy"
-        />
+        <Link to="/mosaic">
+          <img
+            src={heroPic}
+            alt="Vista previa del mosaico colaborativo de la Sagrada Família"
+            loading="lazy"
+            className="hero-clickable"
+          />
+        </Link>
       </section>
 
       <MosaicProgressBar />
@@ -261,9 +267,9 @@ export default function Home() {
           <a href="https://github.com" target="_blank" rel="noreferrer">
             GitHub
           </a>
-          </p>
-          © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API
-          — Desarrollado por el equipo Full Stack 2025.
+        </p>
+        © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API —
+        Desarrollado por el equipo Full Stack 2025.
       </footer>
 
       <LiveCamera />

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "src/pages/Mosaic.css",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1765474436819,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1765474436819,
+            "name": "Commit-0",
+            "content": "/* src/pages/Mosaic.css */\n\n.mosaic-page {\n    width: 100%;\n    min-height: 100vh;\n    padding-top: 80px;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    background: var(--bg-color);\n    color: var(--text-color);\n  }\n  \n  .mosaic-header {\n    text-align: center;\n    margin-bottom: 2.5rem;\n    padding: 0 1.5rem;\n  }\n  \n  .mosaic-title {\n    font-size: 2.4rem;\n    font-weight: 700;\n    margin-bottom: 0.5rem;\n    color: var(--text-color-strong);\n  }\n  \n  .mosaic-subtitle {\n    font-size: 1.2rem;\n    opacity: 0.8;\n    max-width: 700px;\n    margin: 0 auto;\n  }\n  \n  .mosaic-container {\n    width: 100%;\n    max-width: 1400px;\n    padding: 1rem 2rem 4rem 2rem;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n  }\n  \n  @media (max-width: 768px) {\n    .mosaic-title {\n      font-size: 1.9rem;\n    }\n  \n    .mosaic-subtitle {\n      font-size: 1.05rem;\n    }\n  \n    .mosaic-container {\n      padding: 1rem;\n    }\n  }\n  "
+        }
+    ]
+}
