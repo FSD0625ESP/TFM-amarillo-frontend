@@ -6,6 +6,7 @@ import UserList from "../components/admin/UserList";
 import "./Admin.css";
 import axios from "axios";
 import useOnlineUsers from "../hooks/useOnlineUsers";
+import ReactFlagsSelect from "react-flags-select";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -32,6 +33,65 @@ export default function Admin() {
   const [photoToDelete, setPhotoToDelete] = useState(null);
   const { count: onlineCount, users: onlineUsers } = useOnlineUsers();
   const getPhotoId = (photo) => photo?._id || photo?.id;
+  const countryDisplayNames = new Intl.DisplayNames(["es"], { type: "region" });
+  const [editingCountry, setEditingCountry] = useState(false);
+  const [countryDraft, setCountryDraft] = useState("");
+  const [savingCountry, setSavingCountry] = useState(false);
+
+  const formatCountry = useCallback(
+    (countryCode) => {
+      if (!countryCode) return null;
+      const upper = countryCode.toString().trim().toUpperCase();
+      if (!upper) return null;
+      try {
+        return countryDisplayNames.of(upper) || upper;
+      } catch {
+        return upper;
+      }
+    },
+    [countryDisplayNames]
+  );
+
+  const handleSaveCountry = async () => {
+    if (!selectedUser?.id || !countryDraft) return;
+    setSavingCountry(true);
+    try {
+      const res = await axios.put(`${API_URL}/emails/${selectedUser.id}`, {
+        country: countryDraft,
+      });
+      const updated = res.data?.user;
+      const normalizedCountry =
+        updated?.country?.toString().trim().toUpperCase() || countryDraft;
+
+      setSelectedUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              country: normalizedCountry,
+            }
+          : prev
+      );
+
+      if (updated?.email) {
+        setUsersByEmail((prev) => ({
+          ...prev,
+          [updated.email.toLowerCase()]: {
+            ...(prev[updated.email.toLowerCase()] || {}),
+            ...updated,
+          },
+        }));
+      }
+      setEditingCountry(false);
+    } catch (error) {
+      console.error("Error actualizando país:", error);
+      alert(
+        error.response?.data?.message ||
+          "No se pudo actualizar el país. Intenta nuevamente."
+      );
+    } finally {
+      setSavingCountry(false);
+    }
+  };
 
   const applyPhotoUpdate = (updatedPhoto) => {
     const updatedId = getPhotoId(updatedPhoto);
@@ -96,9 +156,31 @@ export default function Admin() {
     }
   }, []);
 
-  const handleViewPhotos = ({ id, email }) => {
+  const handleViewPhotos = (userPayload) => {
+    const id = userPayload?._id || userPayload?.id;
+    const email = userPayload?.email;
     if (!id) return;
-    setSelectedUser({ id, email });
+
+    const userFromIndex =
+      (email && usersByEmail[email.toLowerCase()]) || null;
+
+    const countryCode =
+      (userPayload?.country || userFromIndex?.country || "")
+        .toString()
+        .trim()
+        .toUpperCase();
+
+    setSelectedUser({
+      id,
+      email: userFromIndex?.email || email,
+      name: userPayload?.name || userFromIndex?.name,
+      age: userPayload?.age || userFromIndex?.age,
+      country: countryCode || null,
+    });
+    setCountryDraft(countryCode || "");
+    setEditingCountry(false);
+    setSavingCountry(false);
+
     fetchUserPhotos(id);
     setActiveSection("fotos");
   };
@@ -315,12 +397,73 @@ export default function Admin() {
             <div>
               {selectedUser ? (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-xl font-bold">
-                      Fotos de: {selectedUser.email || selectedUser.id}
-                    </h2>
+                  <div className="flex flex-wrap items-start justify-between gap-4 mb-4 border-b pb-3">
+                    <div className="space-y-2">
+                      <p className="text-xs uppercase tracking-wide text-gray-500">
+                        Perfil de colaborador
+                      </p>
+                      <h2 className="text-2xl font-semibold leading-tight break-all">
+                        {selectedUser.email || selectedUser.id}
+                      </h2>
+                      <div className="flex flex-wrap gap-2 text-sm text-gray-700">
+                        {selectedUser.name && (
+                          <span className="px-3 py-1 rounded-full bg-gray-100">
+                            {selectedUser.name}
+                          </span>
+                        )}
+                        {selectedUser.age && (
+                          <span className="px-3 py-1 rounded-full bg-gray-100">
+                            {selectedUser.age} años
+                          </span>
+                        )}
+                        {selectedUser.country && (
+                          <span className="px-3 py-1 rounded-full bg-gray-100 flex items-center gap-2">
+                            {formatCountry(selectedUser.country)}
+                            {!editingCountry && (
+                              <button
+                                type="button"
+                                className="btn btn-xs btn-outline"
+                                onClick={() => setEditingCountry(true)}
+                              >
+                                Editar
+                              </button>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      {editingCountry && (
+                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                          <ReactFlagsSelect
+                            searchable
+                            selected={countryDraft}
+                            onSelect={(code) => setCountryDraft(code)}
+                            placeholder="Selecciona país"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-primary"
+                              disabled={savingCountry}
+                              onClick={handleSaveCountry}
+                            >
+                              {savingCountry ? "Guardando..." : "Guardar"}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-ghost"
+                              onClick={() => {
+                                setEditingCountry(false);
+                                setCountryDraft(selectedUser.country || "");
+                              }}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <button
-                      className="btn btn-sm"
+                      className="btn btn-sm btn-outline"
                       onClick={handleShowAllPhotos}
                       type="button"
                     >
@@ -356,9 +499,30 @@ export default function Admin() {
                               </div>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 break-all">
-                            {photo.imageUrl || photo.url}
-                          </p>
+                          <div className="space-y-1">
+                            <p className="font-semibold text-sm">
+                              {photo.title || "Sin título"}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              <span className="font-semibold">Descripción:</span>{" "}
+                              {photo.description || "Sin descripción"}
+                            </p>
+                            <p className="text-xs text-gray-500 break-all">
+                              <span className="font-semibold">URL:</span>{" "}
+                              <a
+                                href={photo.imageUrl || photo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="link link-primary"
+                              >
+                                {photo.imageUrl || photo.url}
+                              </a>
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              <span className="font-semibold">Año:</span>{" "}
+                              {photo.year ?? "No especificado"}
+                            </p>
+                          </div>
                           <p className="text-xs font-semibold">
                             Estado:{" "}
                             <span
