@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
+import Mosaic from "./pages/Mosaic";
 
 // 🔹 Magic Link / Registro
 import EmailForm from "./pages/EmailForm";
@@ -48,6 +49,7 @@ function AppContent() {
       <OnlinePresenceConnector currentPath={location.pathname} />
       <Routes>
         <Route path="/" element={<Home toggleMode={toggleMode} />} />
+        <Route path="/mosaic" element={<Mosaic />} />
 
         {/* Magic Link */}
         <Route path="/email" element={<EmailForm />} />

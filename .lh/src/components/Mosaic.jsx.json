@@ -1,0 +1,18 @@
+{
+    "sourceFile": "src/components/Mosaic.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1765474975621,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1765474975621,
+            "name": "Commit-0",
+            "content": "// src/components/MosaicComponent.jsx\nimport React, { useEffect, useState } from \"react\";\nimport \"./MosaicComponent.css\";\nimport { getAllPhotos } from \"../services/photoService\";\n\nexport default function MosaicComponent() {\n  const [photos, setPhotos] = useState([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(false);\n\n  useEffect(() => {\n    async function load() {\n      try {\n        const data = await getAllPhotos();\n        setPhotos(data || []);\n      } catch (err) {\n        console.error(\"Error cargando mosaico:\", err);\n        setError(true);\n      } finally {\n        setLoading(false);\n      }\n    }\n    load();\n  }, []);\n\n  if (loading) return <p className=\"mosaic-loading\">Cargando mosaico...</p>;\n  if (error) return <p className=\"mosaic-error\">No se pudo cargar el mosaico.</p>;\n\n  return (\n    <div className=\"mosaic-grid\">\n      {photos.map((photo) => (\n        <div key={photo.id} className=\"mosaic-tile\">\n          <img src={photo.imageUrl} alt={photo.alt || \"foto colaborativa\"} loading=\"lazy\" />\n        </div>\n      ))}\n    </div>\n  );\n}\n"
+        }
+    ]
+}

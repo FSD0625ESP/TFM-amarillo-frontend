@@ -1,0 +1,22 @@
+{
+    "sourceFile": "src/App.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1765474613717,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1765474649034,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -48,8 +48,9 @@\n     <div className={`app-container ${mode}`}>\n       <OnlinePresenceConnector currentPath={location.pathname} />\n       <Routes>\n         <Route path=\"/\" element={<Home toggleMode={toggleMode} />} />\n+        <Route path=\"/mosaic\" element={<Mosaic />} />\n \n         {/* Magic Link */}\n         <Route path=\"/email\" element={<EmailForm />} />\n         <Route path=\"/verify\" element={<MagicLinkVerification />} />\n"
+                }
+            ],
+            "date": 1765474613717,
+            "name": "Commit-0",
+            "content": "import React, { useState, useEffect } from \"react\";\nimport { BrowserRouter, Routes, Route, useLocation } from \"react-router-dom\";\n\nimport Home from \"./pages/Home\";\nimport Mosaic from \"./pages/Mosaic\";\n\n// 🔹 Magic Link / Registro\nimport EmailForm from \"./pages/EmailForm\";\nimport MagicLinkVerification from \"./pages/MagicLinkVerification\";\nimport UserRegistration from \"./pages/UserRegistration\";\nimport RequestMagicLink from \"./pages/RequestMagicLink\";\n\n// 🔹 Admin\nimport Admin from \"./pages/Admin\";\nimport AdminLogin from \"./components/admin/AdminLogin\";\nimport ProtectedRoute from \"./components/admin/ProtectedRoute\";\n\nimport \"./App.css\";\nimport OnlinePresenceConnector from \"./components/OnlinePresenceConnector\";\n\nfunction App() {\n  return (\n    <BrowserRouter>\n      <AppContent />\n    </BrowserRouter>\n  );\n}\n\nfunction AppContent() {\n  const location = useLocation();\n  // 🔸 Theme Mode (viene de MAIN)\n  const [mode, setMode] = useState(\n    () => localStorage.getItem(\"themeMode\") || \"day\"\n  );\n\n  useEffect(() => {\n    localStorage.setItem(\"themeMode\", mode);\n    document.documentElement.setAttribute(\"data-theme\", mode);\n  }, [mode]);\n\n  // Alternar entre modos\n  const toggleMode = () => {\n    setMode((prev) => (prev === \"day\" ? \"sunset\" : \"day\"));\n  };\n\n  // --- Rutas ---\n  return (\n    <div className={`app-container ${mode}`}>\n      <OnlinePresenceConnector currentPath={location.pathname} />\n      <Routes>\n        <Route path=\"/\" element={<Home toggleMode={toggleMode} />} />\n\n        {/* Magic Link */}\n        <Route path=\"/email\" element={<EmailForm />} />\n        <Route path=\"/verify\" element={<MagicLinkVerification />} />\n        <Route path=\"/register\" element={<UserRegistration />} />\n        <Route path=\"/magic\" element={<RequestMagicLink />} />\n\n        {/* Admin */}\n        <Route\n          path=\"/admin\"\n          element={\n            <ProtectedRoute>\n              <Admin />\n            </ProtectedRoute>\n          }\n        />\n        <Route path=\"/adminlogin\" element={<AdminLogin />} />\n      </Routes>\n    </div>\n  );\n}\n\nexport default App;\n"
+        }
+    ]
+}
