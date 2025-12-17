@@ -4,6 +4,7 @@ import { registerUser } from "../services/CreateUser";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import SuccessScreen from "../components/SuccessScreen";
+import { formatCountry } from "../countryUtils";
 
 function UserRegistrationSecondPage() {
   const storedUser = JSON.parse(localStorage.getItem("userData")) || {};
@@ -94,14 +95,22 @@ function UserRegistrationSecondPage() {
       <h2>Sube tus nuevas fotografías</h2>
       <p className="user-info-text">
         Usuario: <strong>{formData.name}</strong> ({formData.email})<br />
-        País: <strong>{formData.country}</strong>
+        País:{" "}
+        <strong>
+          {formatCountry(formData.country) || formData.country || "—"}
+        </strong>
       </p>
 
       <form onSubmit={handleSubmit}>
         <fieldset disabled>
           <input type="text" name="name" value={formData.name} readOnly />
           <input type="email" name="email" value={formData.email} readOnly />
-          <input type="text" name="country" value={formData.country} readOnly />
+          <input
+            type="text"
+            name="country"
+            value={formatCountry(formData.country) || formData.country}
+            readOnly
+          />
         </fieldset>
 
         <label htmlFor="photos">Selecciona hasta 5 nuevas fotografías:</label>

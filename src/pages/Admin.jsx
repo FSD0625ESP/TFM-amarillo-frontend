@@ -3,10 +3,12 @@ import { FaEyeSlash, FaEye } from "react-icons/fa";
 import PhotoGrid from "../components/admin/PhotoGrid";
 import FactList from "../components/admin/FactList.jsx";
 import UserList from "../components/admin/UserList";
+import StatsPanel from "../components/admin/StatsPanel";
 import "./Admin.css";
 import axios from "axios";
 import useOnlineUsers from "../hooks/useOnlineUsers";
 import ReactFlagsSelect from "react-flags-select";
+import { formatCountry } from "../countryUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -33,24 +35,9 @@ export default function Admin() {
   const [photoToDelete, setPhotoToDelete] = useState(null);
   const { count: onlineCount, users: onlineUsers } = useOnlineUsers();
   const getPhotoId = (photo) => photo?._id || photo?.id;
-  const countryDisplayNames = new Intl.DisplayNames(["es"], { type: "region" });
   const [editingCountry, setEditingCountry] = useState(false);
   const [countryDraft, setCountryDraft] = useState("");
   const [savingCountry, setSavingCountry] = useState(false);
-
-  const formatCountry = useCallback(
-    (countryCode) => {
-      if (!countryCode) return null;
-      const upper = countryCode.toString().trim().toUpperCase();
-      if (!upper) return null;
-      try {
-        return countryDisplayNames.of(upper) || upper;
-      } catch {
-        return upper;
-      }
-    },
-    [countryDisplayNames]
-  );
 
   const handleSaveCountry = async () => {
     if (!selectedUser?.id || !countryDraft) return;
@@ -598,6 +585,11 @@ export default function Admin() {
                   togglingPhotoId={togglingPhotoId}
                 />
               )}
+            </div>
+          )}
+          {activeSection === "estadisticas" && (
+            <div>
+              <StatsPanel onlineCount={onlineCount} />
             </div>
           )}
           {activeSection === "facts" && (
