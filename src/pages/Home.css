@@ -221,6 +221,33 @@
   padding: 1rem;
 }
 
+.carousel-dot {
+  width: 44px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
+  background: #f8f8f8;
+  color: #1f1f1f;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.carousel-dot.is-active {
+  background: #c99753;
+  color: #fff;
+  border-color: #c99753;
+}
+
+.carousel-dot:focus-visible {
+  outline: 2px solid #c99753;
+  outline-offset: 2px;
+}
+
 /* === FOOTER === */
 .footer {
   padding: 1.5rem;

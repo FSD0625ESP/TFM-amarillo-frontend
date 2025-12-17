@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
+import { getPublicStats } from "../services/statsService";
 
 export default function Home() {
   const {
@@ -19,11 +20,38 @@ export default function Home() {
   } = useOnlineUsers();
 
   const [theme, setTheme] = useState("day");
-  const [stats] = useState({
-    fotos: 1523,
-    colaboradores: 847,
-    paises: 27,
+  const [stats, setStats] = useState({
+    fotos: 0,
+    colaboradores: 0,
+    paises: 0,
   });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState("");
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoadingStats(true);
+      setStatsError("");
+      try {
+        const data = await getPublicStats();
+        setStats({
+          fotos: data?.photos ?? 0,
+          colaboradores: data?.collaborators ?? 0,
+          paises: data?.countries ?? 0,
+        });
+      } catch (err) {
+        console.error("Error al cargar estadísticas:", err);
+        setStatsError(
+          err?.response?.data?.message ||
+            "No se pudieron cargar las estadísticas."
+        );
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   // Theme automático por hora
   useEffect(() => {
@@ -149,19 +177,26 @@ export default function Home() {
       {/* ESTADÍSTICAS */}
       <section className="stats-section">
         <h3 className="stats-title">Nuestra comunidad en cifras</h3>
+        {statsError && (
+          <p className="text-red-600 text-sm mb-2">{statsError}</p>
+        )}
         <div className="stats-grid">
           <div className="stat-item">
-            <span className="stat-number">{stats.fotos.toLocaleString()}</span>
+            <span className="stat-number">
+              {loadingStats ? "..." : stats.fotos.toLocaleString()}
+            </span>
             <span className="stat-label">Fotos subidas</span>
           </div>
           <div className="stat-item">
             <span className="stat-number">
-              {stats.colaboradores.toLocaleString()}
+              {loadingStats ? "..." : stats.colaboradores.toLocaleString()}
             </span>
             <span className="stat-label">Colaboradores</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">{stats.paises}</span>
+            <span className="stat-number">
+              {loadingStats ? "..." : stats.paises}
+            </span>
             <span className="stat-label">Países participantes</span>
           </div>
           <div className="stat-item">
@@ -240,14 +275,15 @@ export default function Home() {
                 </div>
 
                 {/* Indicadores */}
-                <div className="flex justify-center gap-2 py-4 bg-base-100">
+                <div className="flex justify-center gap-3 py-4 bg-base-100">
                   {rawSlides.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setCurrentSlide(i)}
-                      className={`btn btn-xs ${
-                        i === currentSlide ? "btn-primary" : ""
+                      className={`carousel-dot ${
+                        i === currentSlide ? "is-active" : ""
                       }`}
+                      type="button"
                     >
                       {i + 1}
                     </button>
