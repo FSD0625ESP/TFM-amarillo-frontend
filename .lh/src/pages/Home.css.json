@@ -3,11 +3,19 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1765474897740,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1768158445997,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,8 +8,26 @@\n   color: var(--text);\n   transition: background-color 0.6s ease, color 0.6s ease;\n }\n \n+.user-page-link {\n+  position: absolute;\n+  top: 10px;\n+  left: 10px;\n+  background-color: #007bff;\n+  color: white;\n+  padding: 10px 15px;\n+  border-radius: 5px;\n+  text-decoration: none;\n+  font-size: 1rem;\n+  font-weight: bold;\n+  transition: background-color 0.3s ease;\n+}\n+\n+.user-page-link:hover {\n+  background-color: #0056b3;\n+}\n+\n /* ========== THEME TOGGLE ========== */\n .theme-toggle {\n   background: transparent;\n   border: none;\n@@ -126,9 +144,8 @@\n   transform: scale(1.02);\n   opacity: 0.92;\n }\n \n-\n /* ========== MOBILE ========== */\n @media (max-width: 600px) {\n   .intro-inner {\n     padding: 0.5rem;\n@@ -221,14 +238,41 @@\n .carousel-info {\n   padding: 1rem;\n }\n \n+.carousel-dot {\n+  width: 44px;\n+  height: 36px;\n+  border-radius: 10px;\n+  border: 1px solid #dcdcdc;\n+  background: #f8f8f8;\n+  color: #1f1f1f;\n+  font-weight: 700;\n+  font-size: 0.95rem;\n+  display: inline-flex;\n+  align-items: center;\n+  justify-content: center;\n+  box-shadow: none;\n+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;\n+}\n+\n+.carousel-dot.is-active {\n+  background: #c99753;\n+  color: #fff;\n+  border-color: #c99753;\n+}\n+\n+.carousel-dot:focus-visible {\n+  outline: 2px solid #c99753;\n+  outline-offset: 2px;\n+}\n+\n /* === FOOTER === */\n .footer {\n   padding: 1.5rem;\n   font-size: 0.9rem;\n   align-items: center;\n-  flex-flow:column wrap;\n+  flex-flow: column wrap;\n   justify-content: flex-start;\n   color: var(--text);\n   margin-bottom: 0;\n }\n@@ -238,8 +282,8 @@\n   font-size: 0.95rem;\n \n   display: flex;\n   flex-wrap: wrap;\n-  flex-shrink:3;\n+  flex-shrink: 3;\n   gap: 1rem;\n   align-items: center;\n }\n"
+                },
+                {
+                    "date": 1768158764068,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -10,24 +10,31 @@\n }\n \n .user-page-link {\n   position: absolute;\n-  top: 10px;\n-  left: 10px;\n-  background-color: #007bff;\n-  color: white;\n-  padding: 10px 15px;\n-  border-radius: 5px;\n+  top: 15px;\n+  left: 15px;\n+  background-color: var(--accent);\n+  color: #ffffff;\n+  padding: 0.5rem 1rem;\n+  border-radius: 8px;\n   text-decoration: none;\n   font-size: 1rem;\n-  font-weight: bold;\n-  transition: background-color 0.3s ease;\n+  font-weight: 600;\n+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);\n+  transition: background-color 0.3s ease, transform 0.2s ease;\n }\n \n .user-page-link:hover {\n-  background-color: #0056b3;\n+  background-color: var(--accent-hover);\n+  transform: scale(1.05);\n }\n \n+.user-page-link:focus-visible {\n+  outline: 2px solid var(--accent-hover);\n+  outline-offset: 2px;\n+}\n+\n /* ========== THEME TOGGLE ========== */\n .theme-toggle {\n   background: transparent;\n   border: none;\n"
                 }
             ],
             "date": 1765474897740,

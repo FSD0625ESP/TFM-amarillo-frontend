@@ -9,6 +9,7 @@ import EmailForm from "./pages/EmailForm";
 import MagicLinkVerification from "./pages/MagicLinkVerification";
 import UserRegistration from "./pages/UserRegistration";
 import RequestMagicLink from "./pages/RequestMagicLink";
+import UserPage from "./pages/UserPage";
 
 // 🔹 Admin
 import Admin from "./pages/Admin";
@@ -56,6 +57,7 @@ function AppContent() {
         <Route path="/verify" element={<MagicLinkVerification />} />
         <Route path="/register" element={<UserRegistration />} />
         <Route path="/magic" element={<RequestMagicLink />} />
+        <Route path="/userPage" element={<UserPage />} />
 
         {/* Admin */}
         <Route

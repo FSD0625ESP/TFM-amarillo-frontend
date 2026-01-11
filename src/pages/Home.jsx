@@ -104,6 +104,10 @@ export default function Home() {
 
   return (
     <main className="home">
+      {/* Button link to UserPage */}
+      <Link to="/userPage" className="user-page-link">
+        Mis Fotos
+      </Link>
       {/* Botón para alternar el modo manualmente */}
       <button
         className="theme-toggle"

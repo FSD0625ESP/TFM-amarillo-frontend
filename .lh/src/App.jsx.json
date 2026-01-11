@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 1,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1765474613717,
@@ -12,6 +12,10 @@
                 {
                     "date": 1765474649034,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -48,8 +48,9 @@\n     <div className={`app-container ${mode}`}>\n       <OnlinePresenceConnector currentPath={location.pathname} />\n       <Routes>\n         <Route path=\"/\" element={<Home toggleMode={toggleMode} />} />\n+        <Route path=\"/mosaic\" element={<Mosaic />} />\n \n         {/* Magic Link */}\n         <Route path=\"/email\" element={<EmailForm />} />\n         <Route path=\"/verify\" element={<MagicLinkVerification />} />\n"
+                },
+                {
+                    "date": 1768158556891,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,8 +8,9 @@\n import EmailForm from \"./pages/EmailForm\";\n import MagicLinkVerification from \"./pages/MagicLinkVerification\";\n import UserRegistration from \"./pages/UserRegistration\";\n import RequestMagicLink from \"./pages/RequestMagicLink\";\n+import UserPage from \"./pages/UserPage\";\n \n // 🔹 Admin\n import Admin from \"./pages/Admin\";\n import AdminLogin from \"./components/admin/AdminLogin\";\n@@ -55,8 +56,9 @@\n         <Route path=\"/email\" element={<EmailForm />} />\n         <Route path=\"/verify\" element={<MagicLinkVerification />} />\n         <Route path=\"/register\" element={<UserRegistration />} />\n         <Route path=\"/magic\" element={<RequestMagicLink />} />\n+        <Route path=\"/userPage\" element={<UserPage />} />\n \n         {/* Admin */}\n         <Route\n           path=\"/admin\"\n"
                 }
             ],
             "date": 1765474613717,
