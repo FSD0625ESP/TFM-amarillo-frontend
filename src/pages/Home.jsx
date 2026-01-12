@@ -176,7 +176,8 @@ export default function Home() {
         </Link>
       </section>
 
-      <MosaicProgressBar />
+      <MosaicProgressBar totalPhotos={stats.fotos} />
+
 
       {/* ESTADÍSTICAS */}
       <section className="stats-section">
