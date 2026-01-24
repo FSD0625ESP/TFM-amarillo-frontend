@@ -14,7 +14,7 @@ function UserRegistrationSecondPage() {
     country: storedUser.country || "",
     photos: [],
     story: "",
-    photoYear: "",
+    year: "",
     terms: false,
   });
 
