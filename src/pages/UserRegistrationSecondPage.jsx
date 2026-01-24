@@ -134,7 +134,10 @@ function UserRegistrationSecondPage() {
           selected={photoYear}
           onChange={(date) => {
             setPhotoYear(date);
-            setFormData({ ...formData, photoYear: date.getFullYear() });
+            setFormData({
+              ...formData,
+              year: date ? date.getFullYear() : "",
+            });
           }}
           showYearPicker
           dateFormat="yyyy"
