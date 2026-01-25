@@ -27,3 +27,14 @@ export const getPhotoYears = async () => {
   const { data } = await axios.get(`${API_URL}/stats/years`);
   return data?.years || [];
 };
+
+export const likePhoto = async (photoId) => {
+  const token = localStorage.getItem("userToken");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const { data } = await axios.patch(
+    `${API_URL}/photos/${photoId}/like`,
+    {},
+    { headers }
+  );
+  return data;
+};
