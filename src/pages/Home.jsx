@@ -157,8 +157,11 @@ export default function Home() {
             <Link to="/email" className="btn btn-primary">
               Colabora con tu foto
             </Link>
-            <Link to="/mosaic" className="btn-link">
+            <Link to="/mosaic" className="btn btn-primary">
               Ver el mosaico
+            </Link>
+            <Link to="/gallery" className="btn btn-primary">
+              Ver la galería
             </Link>
           </div>
         </div>

@@ -1,9 +1,51 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 import "./UserPage.css";
 
 const UserPage = () => {
+  const [searchParams] = useSearchParams();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    const verifyToken = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/emails/verify-token?token=${encodeURIComponent(
+            token
+          )}`
+        );
+        if (res.data?.email) {
+          localStorage.setItem("verifiedEmail", res.data.email.toLowerCase());
+        }
+        if (res.data?.token) {
+          localStorage.setItem("userToken", res.data.token);
+        }
+        if (res.data?.userId && res.data?.email) {
+          const userData = { _id: res.data.userId, email: res.data.email };
+          if (res.data?.country) {
+            userData.country = res.data.country;
+          }
+          localStorage.setItem("userData", JSON.stringify(userData));
+        }
+      } catch (err) {
+        console.error("Error verificando enlace:", err);
+        setError("El enlace no es válido o ha expirado.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyToken();
+  }, [searchParams]);
 
   // Fetch user's photos from the backend
   /* useEffect(() => {
@@ -57,6 +99,8 @@ const UserPage = () => {
 
       {loading ? (
         <p>Cargando todas tus fotos...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
       ) : photos.length === 0 ? (
         <div className="empty-state">
           <p>Aún no has compartido ninguna foto</p>

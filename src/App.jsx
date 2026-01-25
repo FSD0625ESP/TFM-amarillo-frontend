@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Mosaic from "./pages/Mosaic";
 import AddPhotos from "./pages/AddPhoto"
+import Gallery from "./pages/Gallery";
 
 // 🔹 Magic Link / Registro
 import EmailForm from "./pages/EmailForm";
@@ -50,6 +51,9 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home toggleMode={toggleMode} />} />
         <Route path="/mosaic" element={<Mosaic />} />
+
+        {/* RUTA DE LA GALERÍA DE COMUNIDAD */}
+        <Route path="/gallery" element={<Gallery />} />
 
         {/* Magic Link */}
         <Route path="/email" element={<EmailForm />} />
