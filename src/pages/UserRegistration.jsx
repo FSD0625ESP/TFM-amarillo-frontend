@@ -302,6 +302,9 @@ function UserRegistration() {
           <button onClick={() => (window.location.href = "/home")}>
             Ver mosaico
           </button>
+          <button onClick={() => (window.location.href = "/UserPage")}>
+            Ver mis fotos
+          </button>
           <button onClick={() => setModalOpen(false)}>Cerrar</button>
         </div>
       </Modal>

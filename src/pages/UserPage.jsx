@@ -47,6 +47,13 @@ const UserPage = () => {
       <div className="user-page-header">
         <h1>Tus fotos compartidas de la Sagrada Familia</h1>
       </div>
+     <button
+  onClick={() =>
+    window.location.href = `/add-photos?token=${token}`
+  }
+>
+  ➕ Subir otra foto
+</button>
 
       {loading ? (
         <p>Cargando todas tus fotos...</p>

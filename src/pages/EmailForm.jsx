@@ -8,44 +8,33 @@ export default function EmailForm() {
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSending(true);
-    setMessage("");
+  e.preventDefault();
+  setSending(true);
+  setMessage("");
 
-    try {
-      // 🔵 Intentar registro
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/emails/send-magic-link`,
-        { email }
-      );
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/emails/send-smart-link`,
+      { email }
+    );
 
+    if (res.data.mode === "register") {
       setMessage("📧 Te enviamos un enlace para completar tu registro.");
-    } catch (err) {
-      // 🟡 Si ya existe → pedir link de edición
-      if (err.response?.status === 409) {
-        try {
-          await axios.post(
-            `${import.meta.env.VITE_API_URL}/emails/send-edit-link`,
-            { email }
-          );
-
-          setMessage(
-            "📧 Este correo ya estaba registrado. Te enviamos un enlace para editar tus fotos."
-          );
-        } catch (editErr) {
-          console.error(editErr);
-          setMessage(
-            "❌ El correo está registrado, pero no se pudo enviar el enlace de edición."
-          );
-        }
-      } else {
-        console.error("❌ Error enviando Magic Link:", err);
-        setMessage("❌ No se pudo enviar el enlace. Verifica tu correo.");
-      }
-    } finally {
-      setSending(false);
+    } else if (res.data.mode === "edit") {
+      setMessage(
+        "📧 Este correo ya estaba registrado. Te enviamos un enlace para editar tus fotos."
+      );
+    } else {
+      setMessage("📧 Revisa tu correo.");
     }
-  };
+  } catch (err) {
+    console.error("❌ Error enviando Magic Link:", err);
+    setMessage("❌ No se pudo enviar el enlace. Verifica tu correo.");
+  } finally {
+    setSending(false);
+  }
+};
+
 
   return (
     <div className="email-form-container">
