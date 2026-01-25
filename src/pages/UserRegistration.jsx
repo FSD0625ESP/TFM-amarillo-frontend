@@ -102,6 +102,16 @@ function UserRegistration() {
         if (res.data.email) {
           localStorage.setItem("verifiedEmail", res.data.email.toLowerCase());
         }
+        if (res.data.token) {
+          localStorage.setItem("userToken", res.data.token);
+        }
+        if (res.data.userId && res.data.email) {
+          const userData = { _id: res.data.userId, email: res.data.email };
+          if (res.data?.country) {
+            userData.country = res.data.country;
+          }
+          localStorage.setItem("userData", JSON.stringify(userData));
+        }
         setVerified(true);
       } catch {
         setMessage("El enlace ha expirado o no es válido.");
@@ -144,6 +154,12 @@ function UserRegistration() {
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+      if (res.data?.token) {
+        localStorage.setItem("userToken", res.data.token);
+      }
+      if (res.data?.user) {
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
+      }
       setMessage(res.data.message || "Foto subida correctamente.");
       setModalOpen(true);
       reset();
