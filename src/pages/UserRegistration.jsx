@@ -34,7 +34,7 @@ const formSchema = z.object({
     .max(115, "La edad debe ser un número entre 1 y 115."),
   country: z.string().min(1, "Selecciona un país de la lista."),
   story: z.string().trim().min(1, "La historia es obligatoria."),
-  photoYear: z
+  year: z
     .coerce.number({ invalid_type_error: "El año debe ser numérico." })
     .int()
     .min(
@@ -84,7 +84,7 @@ function UserRegistration() {
       age: "",
       country: "",
       story: "",
-      photoYear: "",
+      year: "",
       title: "",
       photos: [],
     },
@@ -101,6 +101,16 @@ function UserRegistration() {
         setEmail(res.data.email);
         if (res.data.email) {
           localStorage.setItem("verifiedEmail", res.data.email.toLowerCase());
+        }
+        if (res.data.token) {
+          localStorage.setItem("userToken", res.data.token);
+        }
+        if (res.data.userId && res.data.email) {
+          const userData = { _id: res.data.userId, email: res.data.email };
+          if (res.data?.country) {
+            userData.country = res.data.country;
+          }
+          localStorage.setItem("userData", JSON.stringify(userData));
         }
         setVerified(true);
       } catch {
@@ -134,7 +144,7 @@ function UserRegistration() {
     data.append("age", Number(formValues.age));
     data.append("country", formValues.country); // código de país seleccionado
     data.append("story", formValues.story.trim());
-    data.append("year", Number(formValues.photoYear));
+    data.append("year", Number(formValues.year));
     data.append("title", formValues.title.trim());
     Array.from(formValues.photos).forEach((file) => data.append("photos", file));
 
@@ -144,6 +154,12 @@ function UserRegistration() {
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+      if (res.data?.token) {
+        localStorage.setItem("userToken", res.data.token);
+      }
+      if (res.data?.user) {
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
+      }
       setMessage(res.data.message || "Foto subida correctamente.");
       setModalOpen(true);
       reset();
@@ -224,9 +240,9 @@ function UserRegistration() {
         )}
 
         <select
-          name="photoYear"
+          name="year"
           className="year-picker"
-          {...register("photoYear")}
+          {...register("year")}
           required
         >
           <option value="" disabled>
@@ -238,8 +254,8 @@ function UserRegistration() {
             </option>
           ))}
         </select>
-        {errors.photoYear && (isSubmitted || touchedFields.photoYear) && (
-          <span className="error">{errors.photoYear.message}</span>
+        {errors.year && (isSubmitted || touchedFields.year) && (
+          <span className="error">{errors.year.message}</span>
         )}
         <input
           type="text"
@@ -301,6 +317,9 @@ function UserRegistration() {
         <div className="modal-buttons">
           <button onClick={() => (window.location.href = "/home")}>
             Ver mosaico
+          </button>
+          <button onClick={() => (window.location.href = "/UserPage")}>
+            Ver mis fotos
           </button>
           <button onClick={() => setModalOpen(false)}>Cerrar</button>
         </div>

@@ -8,27 +8,39 @@ export default function EmailForm() {
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSending(true);
-    setMessage("");
+  e.preventDefault();
+  setSending(true);
+  setMessage("");
 
-    try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/emails/send-magic-link`, {
-        email,
-      });
-      setMessage("✅ Te hemos enviado un enlace mágico a tu correo.");
-    } catch (err) {
-      console.error("❌ Error enviando Magic Link:", err);
-      setMessage("❌ No se pudo enviar el enlace. Verifica tu correo.");
-    } finally {
-      setSending(false);
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/emails/send-smart-link`,
+      { email }
+    );
+
+    if (res.data.mode === "register") {
+      setMessage("📧 Te enviamos un enlace para completar tu registro.");
+    } else if (res.data.mode === "edit") {
+      setMessage(
+        "📧 Este correo ya estaba registrado. Te enviamos un enlace para editar tus fotos."
+      );
+    } else {
+      setMessage("📧 Revisa tu correo.");
     }
-  };
+  } catch (err) {
+    console.error("❌ Error enviando Magic Link:", err);
+    setMessage("❌ No se pudo enviar el enlace. Verifica tu correo.");
+  } finally {
+    setSending(false);
+  }
+};
+
 
   return (
     <div className="email-form-container">
       <h2>Para subir tu foto necesitamos tu correo electrónico</h2>
       <p>Introduce tu correo aquí</p>
+
       <form onSubmit={handleSubmit}>
         <input
           type="email"
@@ -37,8 +49,9 @@ export default function EmailForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+
         <button type="submit" disabled={sending}>
-          {sending ? "Enviando..." : "Recibir enlace mágico"}
+          {sending ? "Enviando..." : "Recibir enlace"}
         </button>
       </form>
 

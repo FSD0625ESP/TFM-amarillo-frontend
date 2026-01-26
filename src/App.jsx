@@ -3,12 +3,12 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Mosaic from "./pages/Mosaic";
+import AddPhotos from "./pages/AddPhoto"
+import Gallery from "./pages/Gallery";
 
 // 🔹 Magic Link / Registro
 import EmailForm from "./pages/EmailForm";
-import MagicLinkVerification from "./pages/MagicLinkVerification";
 import UserRegistration from "./pages/UserRegistration";
-import RequestMagicLink from "./pages/RequestMagicLink";
 import UserPage from "./pages/UserPage";
 
 // 🔹 Admin
@@ -52,12 +52,14 @@ function AppContent() {
         <Route path="/" element={<Home toggleMode={toggleMode} />} />
         <Route path="/mosaic" element={<Mosaic />} />
 
+        {/* RUTA DE LA GALERÍA DE COMUNIDAD */}
+        <Route path="/gallery" element={<Gallery />} />
+
         {/* Magic Link */}
         <Route path="/email" element={<EmailForm />} />
-        <Route path="/verify" element={<MagicLinkVerification />} />
         <Route path="/register" element={<UserRegistration />} />
-        <Route path="/magic" element={<RequestMagicLink />} />
         <Route path="/userPage" element={<UserPage />} />
+        <Route path="/AddPhotos" element={<AddPhotos />} />
 
         {/* Admin */}
         <Route
