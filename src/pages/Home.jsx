@@ -11,6 +11,7 @@ import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
 import { getPublicStats } from "../services/statsService";
+import AboutModal from "../components/AboutModal";
 
 export default function Home() {
   const {
@@ -27,6 +28,12 @@ export default function Home() {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState("");
+
+  // Estado para controlar el modal AboutModal
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+
+  // Función para cerrar modal
+  const closeAbout = () => setIsAboutOpen(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -104,11 +111,10 @@ export default function Home() {
 
   return (
     <main className="home">
-      {/* Button link to UserPage */}
       <Link to="/userPage" className="user-page-link">
         Mis Fotos
       </Link>
-      {/* Botón para alternar el modo manualmente */}
+
       <button
         className="theme-toggle"
         aria-label="Cambiar entre modo día y atardecer"
@@ -124,14 +130,12 @@ export default function Home() {
         />
       </button>
 
-      {/* FACTS */}
       <section className="fact-section" aria-labelledby="fact-title">
         <div className="fact-inner">
           <FactSection />
         </div>
       </section>
 
-      {/* INTRODUCCIÓN */}
       <section className="intro-section" aria-labelledby="intro-title">
         <div className="intro-inner">
           <h2 id="intro-title" className="intro-title">
@@ -139,14 +143,12 @@ export default function Home() {
           </h2>
 
           <p className="intro-text">
-            Con motivo de la inauguración de la Sagrada Família en 2026, hemos
-            querido rendir nuestro pequeño homenaje con este proyecto
-            colaborativo.
-          </p>
-
-          <p className="intro-text">
-            Inspirados por el espíritu participativo de Barcelona, invitamos a
-            cualquier persona a aportar su propia fotografía.
+            Con la finalización de la torre de Jesús, que convertirá a la
+            Sagrada Familia en <strong>la iglesia más alta del mundo</strong> en
+            el centenario de la muerte de Gaudí, este proyecto quiere ser
+            nuestro pequeño tributo. Inspirados por el espíritu participativo de
+            la ciudad de Barcelona, invitamos a todas las persona a subir sus
+            propias fotos de la Basílica.
           </p>
 
           <p className="intro-tagline">
@@ -164,7 +166,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HERO MOSAICO */}
       <section className="hero-preview">
         <Link to="/mosaic">
           <img
@@ -178,7 +179,6 @@ export default function Home() {
 
       <MosaicProgressBar />
 
-      {/* ESTADÍSTICAS */}
       <section className="stats-section">
         <h3 className="stats-title">Nuestra comunidad en cifras</h3>
         {statsError && (
@@ -210,7 +210,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CARRUSEL SIN HASH */}
       <section className="carousel-section">
         <h2 className="section-title">Destacados del mosaico</h2>
 
@@ -240,15 +239,12 @@ export default function Home() {
 
             return (
               <div className="w-full max-w-3xl mx-auto rounded-lg shadow-lg overflow-hidden relative">
-                {/* Imagen */}
                 <div className="relative w-full h-[500px] flex items-center justify-center bg-black/5">
                   <img
                     src={rawSlides[currentSlide].src}
                     alt={rawSlides[currentSlide].title}
                     className="w-full h-full object-contain"
                   />
-
-                  {/* Texto superpuesto */}
                   <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-4">
                     <h3 className="text-lg font-semibold">
                       {rawSlides[currentSlide].title}
@@ -256,7 +252,6 @@ export default function Home() {
                     <p>{rawSlides[currentSlide].description}</p>
                   </div>
 
-                  {/* Flechas de navegación */}
                   <button
                     onClick={() =>
                       setCurrentSlide(
@@ -278,7 +273,6 @@ export default function Home() {
                   </button>
                 </div>
 
-                {/* Indicadores */}
                 <div className="flex justify-center gap-3 py-4 bg-base-100">
                   {rawSlides.map((_, i) => (
                     <button
@@ -299,20 +293,33 @@ export default function Home() {
         )}
       </section>
 
-      {/* FOOTER */}
       <footer className="footer">
         <p className="footer-text">
-          <a href="/about">Sobre el proyecto</a>
+          <button
+            onClick={() => setIsAboutOpen(true)}
+            className="footer-link"
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              color: "inherit",
+              textDecoration: "underline",
+            }}
+            aria-label="Abrir información sobre el proyecto"
+          >
+            Sobre el proyecto
+          </button>
           <a href="/api/docs">API Docs</a>
           <a href="https://github.com" target="_blank" rel="noreferrer">
             GitHub
           </a>
         </p>
-        © {new Date().getFullYear()} Proyecto colaborativo Sagrada Família API —
-        Desarrollado por el equipo Full Stack 2025.
       </footer>
 
       <LiveCamera />
+
+      <AboutModal isOpen={isAboutOpen} onClose={closeAbout} />
     </main>
   );
 }

@@ -67,6 +67,7 @@
   width: 92%;
   max-width: 900px;
   transition: background 0.6s ease;
+  text-align: justify;
 }
 
 .intro-inner {
