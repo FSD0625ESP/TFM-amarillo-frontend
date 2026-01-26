@@ -8,7 +8,7 @@ import {
   getPhotos,
   likePhoto,
 } from "../services/photoService";
-import "./Gallery.css"; // Crearemos este CSS después
+import "./Gallery.css"; 
 
 export default function Gallery() {
   const [photos, setPhotos] = useState([]);

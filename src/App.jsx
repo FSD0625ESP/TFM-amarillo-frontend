@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-
 import Home from "./pages/Home";
 import Mosaic from "./pages/Mosaic";
 import AddPhotos from "./pages/AddPhoto";
