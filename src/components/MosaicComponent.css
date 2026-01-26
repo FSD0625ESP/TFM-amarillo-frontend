@@ -12,7 +12,7 @@
 .mosaic-grid {
   width: 100%;
   display: grid;
-  gap: 6px;
+  gap: 2px;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
 
@@ -21,8 +21,7 @@
   background: var(--bg-soft);
   overflow: hidden;
   border-radius: 6px;
-  height: 0;
-  padding-bottom: 100%; /* cuadrado */
+  aspect-ratio: 1 / 1;
   position: relative;
 }
 

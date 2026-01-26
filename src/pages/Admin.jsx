@@ -38,6 +38,32 @@ export default function Admin() {
   const [editingCountry, setEditingCountry] = useState(false);
   const [countryDraft, setCountryDraft] = useState("");
   const [savingCountry, setSavingCountry] = useState(false);
+  const [mosaicKey, setMosaicKey] = useState("default");
+  const [mosaicWidth, setMosaicWidth] = useState(2000);
+  const [mosaicHeight, setMosaicHeight] = useState(2000);
+  const [useAutoRatio, setUseAutoRatio] = useState(false);
+  const [mainImageAspect, setMainImageAspect] = useState(null);
+  const [mosaicBusy, setMosaicBusy] = useState(false);
+  const [allowReuse, setAllowReuse] = useState(true);
+  const [mosaicError, setMosaicError] = useState("");
+  const [mosaicSnapshot, setMosaicSnapshot] = useState(null);
+  const [mainImageUrl, setMainImageUrl] = useState("");
+  const [uploadingMainImage, setUploadingMainImage] = useState(false);
+  const [tileWidth, setTileWidth] = useState(20);
+  const [tileHeight, setTileHeight] = useState(20);
+  const [generatingTiles, setGeneratingTiles] = useState(false);
+  const [tilesCount, setTilesCount] = useState(null);
+  const [mosaicSnapshots, setMosaicSnapshots] = useState([]);
+  const [loadingSnapshots, setLoadingSnapshots] = useState(false);
+  const [snapshotsError, setSnapshotsError] = useState("");
+  const [snapshotToDelete, setSnapshotToDelete] = useState(null);
+  const [deletingSnapshotId, setDeletingSnapshotId] = useState(null);
+  const [autoEnabled, setAutoEnabled] = useState(false);
+  const [savingAuto, setSavingAuto] = useState(false);
+  const [configLoaded, setConfigLoaded] = useState(false);
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [intervalHours, setIntervalHours] = useState(24);
+  const [refreshSeconds, setRefreshSeconds] = useState(30);
 
   const handleSaveCountry = async () => {
     if (!selectedUser?.id || !countryDraft) return;
@@ -142,6 +168,48 @@ export default function Admin() {
       setAdminName("Admin");
     }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!mainImageUrl) {
+      setMainImageAspect(null);
+      return undefined;
+    }
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      if (cancelled) return;
+      if (img.naturalWidth > 0) {
+        setMainImageAspect(img.naturalHeight / img.naturalWidth);
+      } else {
+        setMainImageAspect(null);
+      }
+    };
+    img.onerror = () => {
+      if (!cancelled) {
+        setMainImageAspect(null);
+      }
+    };
+    img.src = mainImageUrl;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mainImageUrl]);
+
+  const resolveMosaicDimensions = () => {
+    const width = Number(mosaicWidth);
+    const height = Number(mosaicHeight);
+    const safeWidth = Number.isFinite(width) && width > 0 ? width : 2000;
+    const safeHeight =
+      Number.isFinite(height) && height > 0 ? height : safeWidth;
+    const autoHeight =
+      useAutoRatio && Number.isFinite(mainImageAspect)
+        ? Math.max(1, Math.round(safeWidth * mainImageAspect))
+        : safeHeight;
+    return { width: safeWidth, height: autoHeight, baseHeight: safeHeight };
+  };
 
   const handleViewPhotos = (userPayload) => {
     const id = userPayload?._id || userPayload?.id;
@@ -341,6 +409,317 @@ export default function Admin() {
     window.location.href = "/adminlogin";
   };
 
+  const handleGenerateMosaic = async () => {
+    if (!mosaicKey.trim()) {
+      setMosaicError("Debes indicar un mosaicKey.");
+      return;
+    }
+    if (useAutoRatio && !mainImageUrl) {
+      setMosaicError("Para usar auto ratio, sube una imagen principal.");
+      return;
+    }
+    setMosaicBusy(true);
+    setMosaicError("");
+    setMosaicSnapshot(null);
+    try {
+      const { width: outputWidth, height: outputHeight } =
+        resolveMosaicDimensions();
+      if (useAutoRatio && !Number.isFinite(mainImageAspect)) {
+        setMosaicError(
+          "No se pudo leer el tamaño de la imagen principal para el auto ratio."
+        );
+        return;
+      }
+      const tilesCheck = await axios.get(
+        `${API_URL}/mosaic/tiles?mosaicKey=${encodeURIComponent(
+          mosaicKey.trim()
+        )}`
+      );
+      const count = Array.isArray(tilesCheck.data) ? tilesCheck.data.length : 0;
+      setTilesCount(count);
+      if (count === 0) {
+        setMosaicError(
+          "No hay tiles para ese mosaicKey. Genera tiles antes."
+        );
+        return;
+      }
+      await axios.post(`${API_URL}/mosaic/tiles/match`, {
+        mosaicKey: mosaicKey.trim(),
+        allowReuse,
+      });
+      const { data } = await axios.post(`${API_URL}/mosaic/render`, {
+        mosaicKey: mosaicKey.trim(),
+        outputWidth,
+        outputHeight,
+        folder: "Mosaic",
+        format: "jpg",
+      });
+      setMosaicSnapshot(data?.snapshot || null);
+      fetchMosaicSnapshots();
+    } catch (err) {
+      console.error("Error generando mosaico:", err);
+      setMosaicError(
+        err.response?.data?.message || "No se pudo generar el mosaico."
+      );
+    } finally {
+      setMosaicBusy(false);
+    }
+  };
+
+  const fetchMosaicConfig = useCallback(async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/mosaic/config`);
+      if (!data) return;
+      setAutoEnabled(Boolean(data.enabled));
+      if (data.mainImageUrl) setMainImageUrl(data.mainImageUrl);
+      if (data.tileWidth) setTileWidth(data.tileWidth);
+      if (data.tileHeight) setTileHeight(data.tileHeight);
+      if (data.mosaicKey) setMosaicKey(data.mosaicKey);
+      if (data.mosaicWidth || data.outputWidth) {
+        setMosaicWidth(data.mosaicWidth || data.outputWidth);
+      } else if (data.mosaicSize) {
+        setMosaicWidth(data.mosaicSize);
+      }
+      if (data.mosaicHeight || data.outputHeight) {
+        setMosaicHeight(data.mosaicHeight || data.outputHeight);
+      } else if (data.mosaicSize) {
+        setMosaicHeight(data.mosaicSize);
+      }
+      if (data.intervalHours) setIntervalHours(data.intervalHours);
+      if (typeof data.useAutoRatio === "boolean") {
+        setUseAutoRatio(data.useAutoRatio);
+      }
+      if (data.refreshSeconds !== undefined && data.refreshSeconds !== null) {
+        const parsedRefresh = Number(data.refreshSeconds);
+        if (Number.isFinite(parsedRefresh) && parsedRefresh >= 0) {
+          setRefreshSeconds(parsedRefresh);
+        }
+      }
+      if (typeof data.allowReuse === "boolean") {
+        setAllowReuse(data.allowReuse);
+      }
+      setConfigLoaded(true);
+    } catch (err) {
+      console.error("Error cargando config de mosaico:", err);
+    }
+  }, [API_URL]);
+
+  const handleGenerateTiles = async () => {
+    if (!mainImageUrl) {
+      setMosaicError("Primero sube una imagen principal.");
+      return;
+    }
+    setGeneratingTiles(true);
+    setMosaicError("");
+    try {
+      await axios.post(`${API_URL}/mosaic/tiles/generate`, {
+        mainImageUrl,
+        tileWidth: Number(tileWidth) || 20,
+        tileHeight: Number(tileHeight) || 20,
+        mosaicKey: mosaicKey.trim() || "default",
+        overwrite: true,
+      });
+      const tilesCheck = await axios.get(
+        `${API_URL}/mosaic/tiles?mosaicKey=${encodeURIComponent(
+          mosaicKey.trim() || "default"
+        )}`
+      );
+      setTilesCount(
+        Array.isArray(tilesCheck.data) ? tilesCheck.data.length : 0
+      );
+    } catch (err) {
+      console.error("Error generando tiles:", err);
+      setMosaicError(
+        err.response?.data?.message || "No se pudo generar los tiles."
+      );
+    } finally {
+      setGeneratingTiles(false);
+    }
+  };
+
+  const handleUploadMainImage = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingMainImage(true);
+    setMosaicError("");
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("folder", "Mosaic");
+      const { data } = await axios.post(`${API_URL}/mosaic/main-image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const nextUrl = data?.url || "";
+      setMainImageUrl(nextUrl);
+      if (autoEnabled) {
+        const { width, height } = resolveMosaicDimensions();
+        await axios.put(`${API_URL}/mosaic/config`, {
+          enabled: true,
+          mainImageUrl: nextUrl,
+          tileWidth: Number(tileWidth) || 20,
+          tileHeight: Number(tileHeight) || 20,
+          mosaicKey: mosaicKey.trim() || "default",
+          mosaicWidth: width,
+          mosaicHeight: height,
+          mosaicSize: width,
+          useAutoRatio,
+          allowReuse,
+          intervalHours: Number(intervalHours) || 24,
+          refreshSeconds: Number.isFinite(Number(refreshSeconds))
+            ? Number(refreshSeconds)
+            : 30,
+        });
+      }
+    } catch (err) {
+      console.error("Error subiendo imagen principal:", err);
+      setMosaicError(
+        err.response?.data?.message ||
+          "No se pudo subir la imagen principal."
+      );
+    } finally {
+      setUploadingMainImage(false);
+    }
+  };
+
+  const handleToggleAuto = async (nextEnabled) => {
+    if (nextEnabled && !mainImageUrl) {
+      setMosaicError("Primero sube una imagen principal para activar el modo automático.");
+      return;
+    }
+    setSavingAuto(true);
+    setMosaicError("");
+    try {
+      const { width, height } = resolveMosaicDimensions();
+      if (useAutoRatio && !Number.isFinite(mainImageAspect)) {
+        setMosaicError(
+          "No se pudo leer el tamaño de la imagen principal para el auto ratio."
+        );
+        return;
+      }
+      const { data } = await axios.put(`${API_URL}/mosaic/config`, {
+        enabled: nextEnabled,
+        mainImageUrl,
+        tileWidth: Number(tileWidth) || 20,
+        tileHeight: Number(tileHeight) || 20,
+        mosaicKey: mosaicKey.trim() || "default",
+        mosaicWidth: width,
+        mosaicHeight: height,
+        mosaicSize: width,
+        useAutoRatio,
+        allowReuse,
+        intervalHours: Number(intervalHours) || 24,
+        refreshSeconds: Number.isFinite(Number(refreshSeconds))
+          ? Number(refreshSeconds)
+          : 30,
+      });
+      setAutoEnabled(Boolean(data?.enabled));
+      setConfigLoaded(true);
+    } catch (err) {
+      console.error("Error actualizando modo automático:", err);
+      setMosaicError(
+        err.response?.data?.message ||
+          "No se pudo actualizar el modo automático."
+      );
+    } finally {
+      setSavingAuto(false);
+    }
+  };
+
+  const handleSaveAutoConfig = async () => {
+    if (!mainImageUrl) {
+      setMosaicError("Primero sube una imagen principal para guardar la config.");
+      return;
+    }
+    setSavingConfig(true);
+    setMosaicError("");
+    try {
+      const { width, height } = resolveMosaicDimensions();
+      if (useAutoRatio && !Number.isFinite(mainImageAspect)) {
+        setMosaicError(
+          "No se pudo leer el tamaño de la imagen principal para el auto ratio."
+        );
+        return;
+      }
+      const { data } = await axios.put(`${API_URL}/mosaic/config`, {
+        enabled: autoEnabled,
+        mainImageUrl,
+        tileWidth: Number(tileWidth) || 20,
+        tileHeight: Number(tileHeight) || 20,
+        mosaicKey: mosaicKey.trim() || "default",
+        mosaicWidth: width,
+        mosaicHeight: height,
+        mosaicSize: width,
+        useAutoRatio,
+        allowReuse,
+        intervalHours: Number(intervalHours) || 24,
+        refreshSeconds: Number.isFinite(Number(refreshSeconds))
+          ? Number(refreshSeconds)
+          : 30,
+      });
+      setAutoEnabled(Boolean(data?.enabled));
+      setConfigLoaded(true);
+    } catch (err) {
+      console.error("Error guardando config automática:", err);
+      setMosaicError(
+        err.response?.data?.message || "No se pudo guardar la configuración."
+      );
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const handleOpenSnapshot = (snapshotUrl) => {
+    if (!snapshotUrl) return;
+    window.open(snapshotUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleConfirmDeleteSnapshot = async () => {
+    if (!snapshotToDelete?._id) return;
+    setDeletingSnapshotId(snapshotToDelete._id);
+    try {
+      await axios.delete(
+        `${API_URL}/mosaic/snapshots/${snapshotToDelete._id}`
+      );
+      setMosaicSnapshots((prev) =>
+        prev.filter((snapshot) => snapshot._id !== snapshotToDelete._id)
+      );
+      setSnapshotToDelete(null);
+    } catch (err) {
+      console.error("Error eliminando mosaico:", err);
+      setSnapshotsError(
+        err.response?.data?.message || "No se pudo eliminar el mosaico."
+      );
+    } finally {
+      setDeletingSnapshotId(null);
+    }
+  };
+
+  const fetchMosaicSnapshots = useCallback(async () => {
+    setLoadingSnapshots(true);
+    setSnapshotsError("");
+    try {
+      const { data } = await axios.get(`${API_URL}/mosaic/snapshots`);
+      setMosaicSnapshots(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error obteniendo mosaicos:", err);
+      setSnapshotsError(
+        err.response?.data?.message || "No se pudo cargar los mosaicos."
+      );
+    } finally {
+      setLoadingSnapshots(false);
+    }
+  }, [API_URL]);
+
+  useEffect(() => {
+    fetchMosaicSnapshots();
+  }, [fetchMosaicSnapshots]);
+
+  useEffect(() => {
+    fetchMosaicConfig();
+  }, [fetchMosaicConfig]);
+
+  const { height: resolvedHeight } = resolveMosaicDimensions();
+
   return (
     <div data-theme="light" className="drawer drawer-open admin-layout">
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -375,6 +754,360 @@ export default function Admin() {
                         +{onlineUsers.length - 5} más
                       </span>
                     )}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 mosaic-admin-card">
+                <div className="mosaic-header">
+                  <div>
+                    <h2>Generar mosaico</h2>
+                    <p className="mosaic-subtitle">
+                      Sube la imagen principal, define los tiles y genera el
+                      mosaico final.
+                    </p>
+                  </div>
+                  {tilesCount !== null && (
+                    <span className="mosaic-pill">
+                      Tiles: {tilesCount}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mosaic-upload">
+                  <label>
+                    Imagen principal (se sube a Cloudinary)
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadMainImage}
+                      className="file-input file-input-bordered file-input-sm"
+                      disabled={uploadingMainImage}
+                    />
+                  </label>
+                  {mainImageUrl && (
+                    <div className="mosaic-link">
+                      <span>URL:</span>
+                      <a
+                        href={mainImageUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {mainImageUrl}
+                      </a>
+                    </div>
+                  )}
+                  {mainImageUrl && (
+                    <div className="mosaic-preview">
+                      <span className="mosaic-preview-label">
+                        Imagen principal activa
+                      </span>
+                      <div className="mosaic-preview-card">
+                        <img src={mainImageUrl} alt="Imagen principal" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mosaic-grid">
+                  <label>
+                    <span
+                      className="mosaic-tooltip"
+                      data-tooltip="Ancho de cada tile (cuadradito) en píxeles. Ej: 20 = 20px."
+                    >
+                      Tile width (px)
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={tileWidth}
+                      onChange={(e) => setTileWidth(e.target.value)}
+                      className="input input-bordered input-sm"
+                    />
+                  </label>
+                  <label>
+                    <span
+                      className="mosaic-tooltip"
+                      data-tooltip="Alto de cada tile en píxeles. Ej: 20 = 20px."
+                    >
+                      Tile height (px)
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={tileHeight}
+                      onChange={(e) => setTileHeight(e.target.value)}
+                      className="input input-bordered input-sm"
+                    />
+                  </label>
+                  <label>
+                    <span
+                      className="mosaic-tooltip"
+                      data-tooltip="Identificador del mosaico. Sirve para separar mosaicos distintos."
+                    >
+                      mosaicKey
+                    </span>
+                    <input
+                      type="text"
+                      value={mosaicKey}
+                      onChange={(e) => setMosaicKey(e.target.value)}
+                      className="input input-bordered input-sm"
+                      placeholder="default"
+                    />
+                  </label>
+                  <label>
+                    <span
+                      className="mosaic-tooltip"
+                      data-tooltip="Ancho final de la imagen del mosaico."
+                    >
+                      Ancho (px)
+                    </span>
+                    <input
+                      type="number"
+                      min="200"
+                      step="100"
+                      value={mosaicWidth}
+                      onChange={(e) => setMosaicWidth(e.target.value)}
+                      className="input input-bordered input-sm"
+                    />
+                  </label>
+                  <label>
+                    <span
+                      className="mosaic-tooltip"
+                      data-tooltip={
+                        useAutoRatio
+                          ? "Se calcula automáticamente con la imagen principal."
+                          : "Alto final de la imagen del mosaico."
+                      }
+                    >
+                      Alto (px)
+                    </span>
+                    <input
+                      type="number"
+                      min="200"
+                      step="100"
+                      value={useAutoRatio ? resolvedHeight : mosaicHeight}
+                      onChange={(e) => setMosaicHeight(e.target.value)}
+                      className="input input-bordered input-sm"
+                      disabled={useAutoRatio}
+                    />
+                  </label>
+                </div>
+
+                <div className="mosaic-actions">
+                  <div className="mosaic-checkboxes">
+                    <label className="mosaic-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={useAutoRatio}
+                        onChange={(e) => setUseAutoRatio(e.target.checked)}
+                        className="checkbox checkbox-sm"
+                      />
+                      <span
+                        className="mosaic-tooltip"
+                        data-tooltip="Calcula el alto usando la proporción de la imagen principal."
+                      >
+                        Auto ratio
+                      </span>
+                    </label>
+                    <label className="mosaic-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={allowReuse}
+                        onChange={(e) => setAllowReuse(e.target.checked)}
+                        className="checkbox checkbox-sm"
+                      />
+                      Reutilizar fotos
+                    </label>
+                    <label className="mosaic-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={autoEnabled}
+                        onChange={(e) => handleToggleAuto(e.target.checked)}
+                        className="checkbox checkbox-sm"
+                        disabled={savingAuto}
+                      />
+                      Modo automático
+                    </label>
+                    <label className="mosaic-inline-field">
+                      <span
+                        className="mosaic-inline-label mosaic-tooltip"
+                        data-tooltip="Cada cuántas horas se genera automáticamente un mosaico en el backend."
+                      >
+                        Intervalo (h)
+                      </span>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={intervalHours}
+                        onChange={(e) => setIntervalHours(e.target.value)}
+                        className="input input-bordered input-xs"
+                      />
+                    </label>
+                    <label className="mosaic-inline-field">
+                      <span
+                        className="mosaic-inline-label mosaic-tooltip"
+                        data-tooltip="Intervalo en segundos para refrescar el mosaico en la página pública. 0 = desactivar."
+                      >
+                        Refresco (s)
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={refreshSeconds}
+                        onChange={(e) => setRefreshSeconds(e.target.value)}
+                        className="input input-bordered input-xs"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-xs"
+                      onClick={handleSaveAutoConfig}
+                      disabled={savingConfig}
+                    >
+                      {savingConfig ? "Guardando..." : "Guardar config"}
+                    </button>
+                  </div>
+                  <div className="mosaic-buttons">
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      onClick={handleGenerateTiles}
+                      disabled={generatingTiles}
+                    >
+                      {generatingTiles ? "Generando..." : "Generar tiles"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={handleGenerateMosaic}
+                      disabled={mosaicBusy}
+                    >
+                      {mosaicBusy ? "Generando..." : "Generar mosaico"}
+                    </button>
+                  </div>
+                </div>
+
+                {mosaicError && (
+                  <p className="mosaic-error-text">{mosaicError}</p>
+                )}
+                {mosaicSnapshot?.url && (
+                  <p className="mosaic-success-text">
+                    Mosaico generado:{" "}
+                    <a
+                      href={mosaicSnapshot.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Ver imagen
+                    </a>
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-6 mosaic-admin-card">
+                <div className="mosaic-header">
+                  <div>
+                    <h2>Mosaicos generados</h2>
+                    <p className="mosaic-subtitle">
+                      Histórico de mosaicos renderizados.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={fetchMosaicSnapshots}
+                    disabled={loadingSnapshots}
+                  >
+                    {loadingSnapshots ? "Actualizando..." : "Actualizar"}
+                  </button>
+                </div>
+
+                {snapshotsError && (
+                  <p className="mosaic-error-text">{snapshotsError}</p>
+                )}
+
+                {loadingSnapshots ? (
+                  <p className="mosaic-empty">Cargando mosaicos...</p>
+                ) : mosaicSnapshots.length === 0 ? (
+                  <p className="mosaic-empty">
+                    Todavía no hay mosaicos generados.
+                  </p>
+                ) : (
+                  <div className="mosaic-snapshots">
+                    {mosaicSnapshots.map((snapshot) => {
+                      const snapshotKey =
+                        snapshot._id || snapshot.publicId || snapshot.url;
+                      const snapshotUrl = snapshot.url || "";
+                      const snapshotDate = snapshot.createdAt
+                        ? new Date(snapshot.createdAt).toLocaleString("es-ES")
+                        : null;
+                      const canDelete = Boolean(snapshot._id);
+                      return (
+                        <article
+                          key={snapshotKey}
+                          className={`mosaic-snapshot-card ${
+                            snapshotUrl ? "mosaic-snapshot-link" : ""
+                          }`}
+                          role={snapshotUrl ? "button" : undefined}
+                          tabIndex={snapshotUrl ? 0 : -1}
+                          onClick={() => handleOpenSnapshot(snapshotUrl)}
+                          onKeyDown={(event) => {
+                            if (!snapshotUrl) return;
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              handleOpenSnapshot(snapshotUrl);
+                            }
+                          }}
+                        >
+                          <div className="mosaic-snapshot-image">
+                            {snapshotUrl ? (
+                              <img
+                                src={snapshotUrl}
+                                alt={snapshot.mosaicKey || "Mosaico"}
+                              />
+                            ) : (
+                              <div className="mosaic-snapshot-placeholder">
+                                Sin imagen
+                              </div>
+                            )}
+                          </div>
+                          <div className="mosaic-snapshot-body">
+                            <div>
+                              <p className="mosaic-snapshot-title">
+                                {snapshot.mosaicKey || "mosaico"}
+                              </p>
+                              <p className="mosaic-snapshot-meta">
+                                {snapshot.width || snapshot.outputWidth || "?"} x{" "}
+                                {snapshot.height || snapshot.outputHeight || "?"}
+                              </p>
+                              {snapshotDate && (
+                                <p className="mosaic-snapshot-date">
+                                  {snapshotDate}
+                                </p>
+                              )}
+                            </div>
+                            {canDelete && (
+                              <button
+                                type="button"
+                                className="btn btn-xs btn-error"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  setSnapshotToDelete(snapshot);
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -932,6 +1665,41 @@ export default function Admin() {
                 }
               >
                 {deletingPhotoId === (photoToDelete._id || photoToDelete.id)
+                  ? "Eliminando..."
+                  : "Eliminar"}
+              </button>
+            </div>
+          </div>
+        </dialog>
+      )}
+
+      {snapshotToDelete && (
+        <dialog className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">
+              Eliminar mosaico
+            </h3>
+            <p className="mb-4">
+              ¿Seguro que deseas eliminar{" "}
+              <strong>{snapshotToDelete.mosaicKey || "este mosaico"}</strong>?
+              Se borrará definitivamente de la base de datos y de Cloudinary.
+            </p>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setSnapshotToDelete(null)}
+                disabled={deletingSnapshotId === snapshotToDelete._id}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-error"
+                onClick={handleConfirmDeleteSnapshot}
+                disabled={deletingSnapshotId === snapshotToDelete._id}
+              >
+                {deletingSnapshotId === snapshotToDelete._id
                   ? "Eliminando..."
                   : "Eliminar"}
               </button>
