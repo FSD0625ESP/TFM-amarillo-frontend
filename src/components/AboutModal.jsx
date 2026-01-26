@@ -79,9 +79,11 @@ export default function AboutModal({ isOpen, onClose }) {
           la ciudad de Barcelona, donde reside también{" "}
           <a
             href="https://nuclio.school/"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ color: "inherit", textDecoration: "underline" }}
           >
-            NUCLIO DIGITAL SCHOOL
+            nuclio digital school
           </a>{" "}
           la institución que nos formó. Este año tan especial para la Basílica,
           era la ocasión ideal para rendirle homenaje creando toda una{" "}

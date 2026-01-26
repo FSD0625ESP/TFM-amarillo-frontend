@@ -182,7 +182,6 @@ export default function Home() {
 
       <MosaicProgressBar totalPhotos={stats.fotos} />
 
-
       <section className="stats-section">
         <h3 className="stats-title">Nuestra comunidad en cifras</h3>
         {statsError && (
@@ -307,8 +306,7 @@ export default function Home() {
               border: "none",
               padding: 0,
               cursor: "pointer",
-              color: "inherit",
-              textDecoration: "underline",
+              color: "white",
             }}
             aria-label="Abrir información sobre el proyecto"
           >
