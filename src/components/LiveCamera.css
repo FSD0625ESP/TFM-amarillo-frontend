@@ -18,17 +18,19 @@
   transform: scale(1.03);
   box-shadow: 0 8px 22px rgba(255, 122, 31, 0.35);
 }
-
-/* Modo expandido */
 .livecam-container.expanded {
-  width: 85vw;
-  height: 70vh;
-  bottom: 50%;
-  right: 50%;
-  transform: translate(50%, 50%);
+  position: fixed; /* MUY importante */
+  width: 50%;
+  height: 50%;
+
+  bottom: 25%;
+  right: 25%;
+  transform: translate(-50%, -50%);
+
   box-shadow: 0 0 40px rgba(255, 122, 31, 0.45);
   border: 3px solid #ffb774;
   background: #fff4ea;
+  z-index: 9999;
 }
 
 /* Iframe */
