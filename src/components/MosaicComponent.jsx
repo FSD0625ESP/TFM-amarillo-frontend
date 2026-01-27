@@ -10,14 +10,63 @@ export default function MosaicComponent() {
   const [error, setError] = useState(false);
   const mosaicKey = searchParams.get("mosaicKey") || "default";
 
-  const cols = useMemo(() => {
-    if (!tiles.length) return 0;
-    return (
-      tiles.reduce((maxCol, tile) => {
-        const col = Number.isFinite(tile?.col) ? tile.col : 0;
-        return Math.max(maxCol, col);
-      }, 0) + 1
+  const { normalizedTiles, baseWidth, baseHeight } = useMemo(() => {
+    if (!tiles.length) {
+      return { normalizedTiles: [], baseWidth: 0, baseHeight: 0 };
+    }
+
+    const toNumber = (value) => {
+      if (value === null || value === undefined || value === "") return null;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const normalized = tiles
+      .map((tile) => {
+        const width =
+          toNumber(tile?.width) ??
+          toNumber(tile?.tileWidth) ??
+          toNumber(tile?.w) ??
+          null;
+        const height =
+          toNumber(tile?.height) ??
+          toNumber(tile?.tileHeight) ??
+          toNumber(tile?.h) ??
+          null;
+        const col = toNumber(tile?.col);
+        const row = toNumber(tile?.row);
+        const left =
+          toNumber(tile?.left) ??
+          toNumber(tile?.x) ??
+          (col !== null && width !== null ? col * width : null);
+        const top =
+          toNumber(tile?.top) ??
+          toNumber(tile?.y) ??
+          (row !== null && height !== null ? row * height : null);
+        return { ...tile, left, top, width, height };
+      })
+      .filter(
+        (tile) =>
+          Number.isFinite(tile.left) &&
+          Number.isFinite(tile.top) &&
+          Number.isFinite(tile.width) &&
+          Number.isFinite(tile.height)
+      );
+
+    const width = normalized.reduce(
+      (maxWidth, tile) => Math.max(maxWidth, tile.left + tile.width),
+      0
     );
+    const height = normalized.reduce(
+      (maxHeight, tile) => Math.max(maxHeight, tile.top + tile.height),
+      0
+    );
+
+    return {
+      normalizedTiles: normalized,
+      baseWidth: width,
+      baseHeight: height,
+    };
   }, [tiles]);
 
   useEffect(() => {
@@ -60,24 +109,40 @@ export default function MosaicComponent() {
     return <p className="mosaic-error">No se pudo cargar el mosaico.</p>;
   if (!tiles.length)
     return <p className="mosaic-error">No hay tiles para este mosaico.</p>;
+  if (!normalizedTiles.length || !baseWidth || !baseHeight) {
+    return (
+      <p className="mosaic-error">Tiles incompletos para mostrar el mosaico.</p>
+    );
+  }
 
   return (
     <div
       className="mosaic-grid"
       style={{
-        gridTemplateColumns: cols
-          ? `repeat(${cols}, minmax(0, 1fr))`
-          : undefined,
+        aspectRatio: `${baseWidth} / ${baseHeight}`,
       }}
     >
-      {tiles.map((tile) => {
-        const color = Array.isArray(tile.color) ? tile.color : [128, 128, 128];
+      {normalizedTiles.map((tile) => {
+        const color =
+          Array.isArray(tile.color) && tile.color.length === 3
+            ? tile.color
+            : [128, 128, 128];
         const [r, g, b] = color;
+        const left = (tile.left / baseWidth) * 100;
+        const top = (tile.top / baseHeight) * 100;
+        const width = (tile.width / baseWidth) * 100;
+        const height = (tile.height / baseHeight) * 100;
         return (
           <div
             key={tile._id}
             className="mosaic-tile"
-            style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
+            style={{
+              left: `${left}%`,
+              top: `${top}%`,
+              width: `${width}%`,
+              height: `${height}%`,
+              backgroundColor: `rgb(${r}, ${g}, ${b})`,
+            }}
           >
             {tile.matchedUrl ? (
               <img

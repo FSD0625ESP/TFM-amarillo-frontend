@@ -14,6 +14,7 @@ export default function Mosaic() {
   const scaleRef = useRef(null);
   const panStartRef = useRef({ x: 0, y: 0, startX: 0, startY: 0 });
   const tilesRef = useRef([]);
+  const baseSizeRef = useRef({ width: 1, height: 1 });
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 5;
@@ -172,10 +173,19 @@ export default function Mosaic() {
   const openTileAtPoint = useCallback(
     (clientX, clientY) => {
       const viewport = viewportRef.current;
+      const content = scaleRef.current;
       if (!viewport) return;
       const rect = viewport.getBoundingClientRect();
-      const x = (clientX - rect.left - offset.x) / scale;
-      const y = (clientY - rect.top - offset.y) / scale;
+      const xCss = (clientX - rect.left - offset.x) / scale;
+      const yCss = (clientY - rect.top - offset.y) / scale;
+      const baseWidth = baseSizeRef.current.width || 1;
+      const baseHeight = baseSizeRef.current.height || 1;
+      const scaleX =
+        content && content.offsetWidth ? baseWidth / content.offsetWidth : 1;
+      const scaleY =
+        content && content.offsetHeight ? baseHeight / content.offsetHeight : 1;
+      const x = xCss * scaleX;
+      const y = yCss * scaleY;
       const tiles = tilesRef.current || [];
       const tile = tiles.find(
         (item) =>
@@ -292,7 +302,26 @@ export default function Mosaic() {
                   mosaicKey="default"
                   pollIntervalMs={pollIntervalMs}
                   onTilesReady={(tiles) => {
-                    tilesRef.current = tiles || [];
+                    const normalized = tiles || [];
+                    tilesRef.current = normalized;
+                    if (normalized.length) {
+                      const width = normalized.reduce(
+                        (maxWidth, tile) =>
+                          Math.max(maxWidth, tile.left + tile.width),
+                        0
+                      );
+                      const height = normalized.reduce(
+                        (maxHeight, tile) =>
+                          Math.max(maxHeight, tile.top + tile.height),
+                        0
+                      );
+                      baseSizeRef.current = {
+                        width: width || 1,
+                        height: height || 1,
+                      };
+                    } else {
+                      baseSizeRef.current = { width: 1, height: 1 };
+                    }
                   }}
                 />
               </div>

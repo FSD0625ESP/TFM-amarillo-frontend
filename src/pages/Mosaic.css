@@ -185,21 +185,77 @@
   z-index: 2;
 }
 
-.mosaic-image {
+.mosaic-visual {
+  position: relative;
   width: min(90vw, 1100px);
   max-width: 100%;
+  display: inline-block;
+}
+
+.mosaic-placeholder {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: radial-gradient(circle at top, #1f2937, #0f172a 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: #e2e8f0;
+  z-index: 2;
+}
+
+.mosaic-placeholder-text {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.mosaic-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(226, 232, 240, 0.25);
+  border-top-color: #f8fafc;
+  animation: mosaic-spin 0.9s linear infinite;
+}
+
+.mosaic-image,
+.mosaic-canvas {
+  width: 100%;
   border-radius: 18px;
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
   display: block;
 }
 
+.mosaic-image {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-fit: cover;
+}
+
 .mosaic-canvas {
-  width: min(90vw, 1100px);
-  max-width: 100%;
-  border-radius: 18px;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
   background: #0f172a;
-  display: block;
+}
+
+.mosaic-fade {
+  transition: opacity 0.6s ease;
+}
+
+.mosaic-fade.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mosaic-fade.is-visible {
+  opacity: 1;
+}
+
+@keyframes mosaic-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .mosaic-state {
