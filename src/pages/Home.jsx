@@ -67,10 +67,10 @@ export default function Home() {
   //   else setTheme("day");
   // }, []);
 
-  // Aplicar el tema
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+  // // Aplicar el tema
+  // useEffect(() => {
+  //   document.documentElement.setAttribute("data-theme", theme);
+  // }, [theme]);
 
   // Fotos destacadas
   const [highlighted, setHighlighted] = useState(null);
