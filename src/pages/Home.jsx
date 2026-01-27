@@ -53,17 +53,17 @@ export default function Home() {
     fetchStats();
   }, []);
 
-  // Theme automático por hora
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 21 || hour < 6) setTheme("sunset");
-    else setTheme("day");
-  }, []);
+  // // Theme automático por hora
+  // useEffect(() => {
+  //   const hour = new Date().getHours();
+  //   if (hour >= 21 || hour < 6) setTheme("sunset");
+  //   else setTheme("day");
+  // }, []);
 
-  // Aplicar el tema
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+  // // Aplicar el tema
+  // useEffect(() => {
+  //   document.documentElement.setAttribute("data-theme", theme);
+  // }, [theme]);
 
   // Fotos destacadas
   const [highlighted, setHighlighted] = useState(null);

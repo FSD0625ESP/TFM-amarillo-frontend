@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaEyeSlash, FaEye } from "react-icons/fa";
-import PhotoGrid from "../components/admin/PhotoGrid";
+import AdminHome from "../components/admin/AdminHome";
+import AdminPhotosSection from "../components/admin/AdminPhotosSection";
+import AdminSidebar from "../components/admin/AdminSidebar";
+import ConfirmDeletePhotoModal from "../components/admin/ConfirmDeletePhotoModal";
+import ConfirmDeleteSnapshotModal from "../components/admin/ConfirmDeleteSnapshotModal";
+import EditPhotoModal from "../components/admin/EditPhotoModal";
 import FactList from "../components/admin/FactList.jsx";
 import UserList from "../components/admin/UserList";
 import StatsPanel from "../components/admin/StatsPanel";
 import "./Admin.css";
 import axios from "axios";
 import useOnlineUsers from "../hooks/useOnlineUsers";
-import ReactFlagsSelect from "react-flags-select";
-import { formatCountry } from "../countryUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -60,7 +62,7 @@ export default function Admin() {
   const [deletingSnapshotId, setDeletingSnapshotId] = useState(null);
   const [autoEnabled, setAutoEnabled] = useState(false);
   const [savingAuto, setSavingAuto] = useState(false);
-  const [configLoaded, setConfigLoaded] = useState(false);
+  const [, setConfigLoaded] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
   const [intervalHours, setIntervalHours] = useState(24);
   const [refreshSeconds, setRefreshSeconds] = useState(30);
@@ -136,7 +138,7 @@ export default function Admin() {
     } finally {
       setLoadingAllPhotos(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     fetchAllPhotos();
@@ -159,7 +161,7 @@ export default function Admin() {
     };
 
     fetchUsersIndex();
-  }, [API_URL]);
+  }, []);
   useEffect(() => {
     const storedName = localStorage.getItem("adminName");
     if (storedName && storedName.trim() !== "") {
@@ -502,7 +504,7 @@ export default function Admin() {
     } catch (err) {
       console.error("Error cargando config de mosaico:", err);
     }
-  }, [API_URL]);
+  }, []);
 
   const handleGenerateTiles = async () => {
     if (!mainImageUrl) {
@@ -708,7 +710,7 @@ export default function Admin() {
     } finally {
       setLoadingSnapshots(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     fetchMosaicSnapshots();
@@ -726,599 +728,77 @@ export default function Admin() {
       <div className="drawer-content">
         <div className="p-6">
           {activeSection === "home" && (
-            <>
-              <h1 className="text-2xl font-bold mb-4">
-                Bienvenido, {adminName}
-              </h1>
-              <p className="text-gray-600 mb-3">
-                Desde este panel puedes gestionar fotos, usuarios, facts y ver
-                estadísticas.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-gray-700">
-                  Usuarios online ahora:
-                </span>
-                <span className="badge badge-success badge-outline">
-                  {onlineCount}
-                </span>
-                {onlineUsers.length > 0 && (
-                  <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                    {onlineUsers.slice(0, 5).map((u, idx) => (
-                      <span key={u.id || u.email || idx} className="badge badge-neutral">
-                        {u.email || u.id}
-                      </span>
-                    ))}
-                    {onlineUsers.length > 5 && (
-                      <span className="badge badge-ghost">
-                        +{onlineUsers.length - 5} más
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 mosaic-admin-card">
-                <div className="mosaic-header">
-                  <div>
-                    <h2>Generar mosaico</h2>
-                    <p className="mosaic-subtitle">
-                      Sube la imagen principal, define los tiles y genera el
-                      mosaico final.
-                    </p>
-                  </div>
-                  {tilesCount !== null && (
-                    <span className="mosaic-pill">
-                      Tiles: {tilesCount}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mosaic-upload">
-                  <label>
-                    Imagen principal (se sube a Cloudinary)
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleUploadMainImage}
-                      className="file-input file-input-bordered file-input-sm"
-                      disabled={uploadingMainImage}
-                    />
-                  </label>
-                  {mainImageUrl && (
-                    <div className="mosaic-link">
-                      <span>URL:</span>
-                      <a
-                        href={mainImageUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {mainImageUrl}
-                      </a>
-                    </div>
-                  )}
-                  {mainImageUrl && (
-                    <div className="mosaic-preview">
-                      <span className="mosaic-preview-label">
-                        Imagen principal activa
-                      </span>
-                      <div className="mosaic-preview-card">
-                        <img src={mainImageUrl} alt="Imagen principal" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mosaic-grid">
-                  <label>
-                    <span
-                      className="mosaic-tooltip"
-                      data-tooltip="Ancho de cada tile (cuadradito) en píxeles. Ej: 20 = 20px."
-                    >
-                      Tile width (px)
-                    </span>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={tileWidth}
-                      onChange={(e) => setTileWidth(e.target.value)}
-                      className="input input-bordered input-sm"
-                    />
-                  </label>
-                  <label>
-                    <span
-                      className="mosaic-tooltip"
-                      data-tooltip="Alto de cada tile en píxeles. Ej: 20 = 20px."
-                    >
-                      Tile height (px)
-                    </span>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={tileHeight}
-                      onChange={(e) => setTileHeight(e.target.value)}
-                      className="input input-bordered input-sm"
-                    />
-                  </label>
-                  <label>
-                    <span
-                      className="mosaic-tooltip"
-                      data-tooltip="Identificador del mosaico. Sirve para separar mosaicos distintos."
-                    >
-                      mosaicKey
-                    </span>
-                    <input
-                      type="text"
-                      value={mosaicKey}
-                      onChange={(e) => setMosaicKey(e.target.value)}
-                      className="input input-bordered input-sm"
-                      placeholder="default"
-                    />
-                  </label>
-                  <label>
-                    <span
-                      className="mosaic-tooltip"
-                      data-tooltip="Ancho final de la imagen del mosaico."
-                    >
-                      Ancho (px)
-                    </span>
-                    <input
-                      type="number"
-                      min="200"
-                      step="100"
-                      value={mosaicWidth}
-                      onChange={(e) => setMosaicWidth(e.target.value)}
-                      className="input input-bordered input-sm"
-                    />
-                  </label>
-                  <label>
-                    <span
-                      className="mosaic-tooltip"
-                      data-tooltip={
-                        useAutoRatio
-                          ? "Se calcula automáticamente con la imagen principal."
-                          : "Alto final de la imagen del mosaico."
-                      }
-                    >
-                      Alto (px)
-                    </span>
-                    <input
-                      type="number"
-                      min="200"
-                      step="100"
-                      value={useAutoRatio ? resolvedHeight : mosaicHeight}
-                      onChange={(e) => setMosaicHeight(e.target.value)}
-                      className="input input-bordered input-sm"
-                      disabled={useAutoRatio}
-                    />
-                  </label>
-                </div>
-
-                <div className="mosaic-actions">
-                  <div className="mosaic-checkboxes">
-                    <label className="mosaic-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={useAutoRatio}
-                        onChange={(e) => setUseAutoRatio(e.target.checked)}
-                        className="checkbox checkbox-sm"
-                      />
-                      <span
-                        className="mosaic-tooltip"
-                        data-tooltip="Calcula el alto usando la proporción de la imagen principal."
-                      >
-                        Auto ratio
-                      </span>
-                    </label>
-                    <label className="mosaic-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={allowReuse}
-                        onChange={(e) => setAllowReuse(e.target.checked)}
-                        className="checkbox checkbox-sm"
-                      />
-                      Reutilizar fotos
-                    </label>
-                    <label className="mosaic-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={autoEnabled}
-                        onChange={(e) => handleToggleAuto(e.target.checked)}
-                        className="checkbox checkbox-sm"
-                        disabled={savingAuto}
-                      />
-                      Modo automático
-                    </label>
-                    <label className="mosaic-inline-field">
-                      <span
-                        className="mosaic-inline-label mosaic-tooltip"
-                        data-tooltip="Cada cuántas horas se genera automáticamente un mosaico en el backend."
-                      >
-                        Intervalo (h)
-                      </span>
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={intervalHours}
-                        onChange={(e) => setIntervalHours(e.target.value)}
-                        className="input input-bordered input-xs"
-                      />
-                    </label>
-                    <label className="mosaic-inline-field">
-                      <span
-                        className="mosaic-inline-label mosaic-tooltip"
-                        data-tooltip="Intervalo en segundos para refrescar el mosaico en la página pública. 0 = desactivar."
-                      >
-                        Refresco (s)
-                      </span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={refreshSeconds}
-                        onChange={(e) => setRefreshSeconds(e.target.value)}
-                        className="input input-bordered input-xs"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-xs"
-                      onClick={handleSaveAutoConfig}
-                      disabled={savingConfig}
-                    >
-                      {savingConfig ? "Guardando..." : "Guardar config"}
-                    </button>
-                  </div>
-                  <div className="mosaic-buttons">
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-sm"
-                      onClick={handleGenerateTiles}
-                      disabled={generatingTiles}
-                    >
-                      {generatingTiles ? "Generando..." : "Generar tiles"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={handleGenerateMosaic}
-                      disabled={mosaicBusy}
-                    >
-                      {mosaicBusy ? "Generando..." : "Generar mosaico"}
-                    </button>
-                  </div>
-                </div>
-
-                {mosaicError && (
-                  <p className="mosaic-error-text">{mosaicError}</p>
-                )}
-                {mosaicSnapshot?.url && (
-                  <p className="mosaic-success-text">
-                    Mosaico generado:{" "}
-                    <a
-                      href={mosaicSnapshot.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver imagen
-                    </a>
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-6 mosaic-admin-card">
-                <div className="mosaic-header">
-                  <div>
-                    <h2>Mosaicos generados</h2>
-                    <p className="mosaic-subtitle">
-                      Histórico de mosaicos renderizados.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-sm"
-                    onClick={fetchMosaicSnapshots}
-                    disabled={loadingSnapshots}
-                  >
-                    {loadingSnapshots ? "Actualizando..." : "Actualizar"}
-                  </button>
-                </div>
-
-                {snapshotsError && (
-                  <p className="mosaic-error-text">{snapshotsError}</p>
-                )}
-
-                {loadingSnapshots ? (
-                  <p className="mosaic-empty">Cargando mosaicos...</p>
-                ) : mosaicSnapshots.length === 0 ? (
-                  <p className="mosaic-empty">
-                    Todavía no hay mosaicos generados.
-                  </p>
-                ) : (
-                  <div className="mosaic-snapshots">
-                    {mosaicSnapshots.map((snapshot) => {
-                      const snapshotKey =
-                        snapshot._id || snapshot.publicId || snapshot.url;
-                      const snapshotUrl = snapshot.url || "";
-                      const snapshotDate = snapshot.createdAt
-                        ? new Date(snapshot.createdAt).toLocaleString("es-ES")
-                        : null;
-                      const canDelete = Boolean(snapshot._id);
-                      return (
-                        <article
-                          key={snapshotKey}
-                          className={`mosaic-snapshot-card ${
-                            snapshotUrl ? "mosaic-snapshot-link" : ""
-                          }`}
-                          role={snapshotUrl ? "button" : undefined}
-                          tabIndex={snapshotUrl ? 0 : -1}
-                          onClick={() => handleOpenSnapshot(snapshotUrl)}
-                          onKeyDown={(event) => {
-                            if (!snapshotUrl) return;
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              handleOpenSnapshot(snapshotUrl);
-                            }
-                          }}
-                        >
-                          <div className="mosaic-snapshot-image">
-                            {snapshotUrl ? (
-                              <img
-                                src={snapshotUrl}
-                                alt={snapshot.mosaicKey || "Mosaico"}
-                              />
-                            ) : (
-                              <div className="mosaic-snapshot-placeholder">
-                                Sin imagen
-                              </div>
-                            )}
-                          </div>
-                          <div className="mosaic-snapshot-body">
-                            <div>
-                              <p className="mosaic-snapshot-title">
-                                {snapshot.mosaicKey || "mosaico"}
-                              </p>
-                              <p className="mosaic-snapshot-meta">
-                                {snapshot.width || snapshot.outputWidth || "?"} x{" "}
-                                {snapshot.height || snapshot.outputHeight || "?"}
-                              </p>
-                              {snapshotDate && (
-                                <p className="mosaic-snapshot-date">
-                                  {snapshotDate}
-                                </p>
-                              )}
-                            </div>
-                            {canDelete && (
-                              <button
-                                type="button"
-                                className="btn btn-xs btn-error"
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  setSnapshotToDelete(snapshot);
-                                }}
-                              >
-                                Eliminar
-                              </button>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </>
+            <AdminHome
+              adminName={adminName}
+              onlineCount={onlineCount}
+              onlineUsers={onlineUsers}
+              tilesCount={tilesCount}
+              mainImageUrl={mainImageUrl}
+              uploadingMainImage={uploadingMainImage}
+              onUploadMainImage={handleUploadMainImage}
+              tileWidth={tileWidth}
+              onTileWidthChange={setTileWidth}
+              tileHeight={tileHeight}
+              onTileHeightChange={setTileHeight}
+              mosaicKey={mosaicKey}
+              onMosaicKeyChange={setMosaicKey}
+              mosaicWidth={mosaicWidth}
+              onMosaicWidthChange={setMosaicWidth}
+              mosaicHeight={mosaicHeight}
+              onMosaicHeightChange={setMosaicHeight}
+              useAutoRatio={useAutoRatio}
+              onToggleAutoRatio={setUseAutoRatio}
+              resolvedHeight={resolvedHeight}
+              allowReuse={allowReuse}
+              onAllowReuseChange={setAllowReuse}
+              autoEnabled={autoEnabled}
+              onAutoEnabledChange={handleToggleAuto}
+              savingAuto={savingAuto}
+              intervalHours={intervalHours}
+              onIntervalHoursChange={setIntervalHours}
+              refreshSeconds={refreshSeconds}
+              onRefreshSecondsChange={setRefreshSeconds}
+              onSaveAutoConfig={handleSaveAutoConfig}
+              savingConfig={savingConfig}
+              onGenerateTiles={handleGenerateTiles}
+              generatingTiles={generatingTiles}
+              onGenerateMosaic={handleGenerateMosaic}
+              mosaicBusy={mosaicBusy}
+              mosaicError={mosaicError}
+              mosaicSnapshot={mosaicSnapshot}
+              snapshotsError={snapshotsError}
+              loadingSnapshots={loadingSnapshots}
+              mosaicSnapshots={mosaicSnapshots}
+              onRefreshSnapshots={fetchMosaicSnapshots}
+              onOpenSnapshot={handleOpenSnapshot}
+              onRequestDeleteSnapshot={setSnapshotToDelete}
+            />
           )}
           {activeSection === "fotos" && (
-            <div>
-              {selectedUser ? (
-                <>
-                  <div className="flex flex-wrap items-start justify-between gap-4 mb-4 border-b pb-3">
-                    <div className="space-y-2">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">
-                        Perfil de colaborador
-                      </p>
-                      <h2 className="text-2xl font-semibold leading-tight break-all">
-                        {selectedUser.email || selectedUser.id}
-                      </h2>
-                      <div className="flex flex-wrap gap-2 text-sm text-gray-700">
-                        {selectedUser.name && (
-                          <span className="px-3 py-1 rounded-full bg-gray-100">
-                            {selectedUser.name}
-                          </span>
-                        )}
-                        {selectedUser.age && (
-                          <span className="px-3 py-1 rounded-full bg-gray-100">
-                            {selectedUser.age} años
-                          </span>
-                        )}
-                        {selectedUser.country && (
-                          <span className="px-3 py-1 rounded-full bg-gray-100 flex items-center gap-2">
-                            {formatCountry(selectedUser.country)}
-                            {!editingCountry && (
-                              <button
-                                type="button"
-                                className="btn btn-xs btn-outline"
-                                onClick={() => setEditingCountry(true)}
-                              >
-                                Editar
-                              </button>
-                            )}
-                          </span>
-                        )}
-                      </div>
-                      {editingCountry && (
-                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                          <ReactFlagsSelect
-                            searchable
-                            selected={countryDraft}
-                            onSelect={(code) => setCountryDraft(code)}
-                            placeholder="Selecciona país"
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-primary"
-                              disabled={savingCountry}
-                              onClick={handleSaveCountry}
-                            >
-                              {savingCountry ? "Guardando..." : "Guardar"}
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-ghost"
-                              onClick={() => {
-                                setEditingCountry(false);
-                                setCountryDraft(selectedUser.country || "");
-                              }}
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      className="btn btn-sm btn-outline"
-                      onClick={handleShowAllPhotos}
-                      type="button"
-                    >
-                      Ver todas las fotos
-                    </button>
-                  </div>
-                  {loadingPhotos ? (
-                    <p>Cargando fotos...</p>
-                  ) : userPhotos.length === 0 ? (
-                    <p className="opacity-60">Este usuario no tiene fotos.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                      {userPhotos.map((photo) => (
-                        <div
-                          key={photo.id || photo.url}
-                          className="rounded-lg shadow bg-white p-4 space-y-2"
-                        >
-                          <div className="relative">
-                            <img
-                              src={photo.imageUrl || photo.url}
-                              alt={`Foto subida por ${
-                                selectedUser.email || selectedUser.id
-                              }`}
-                              className={`w-full h-48 object-cover rounded mb-2 ${
-                                photo.hidden ? "opacity-60" : ""
-                              }`}
-                            />
-                            {photo.hidden && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="badge badge-warning text-xs sm:text-sm px-3 py-1 shadow">
-                                  Foto oculta
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="space-y-1">
-                            <p className="font-semibold text-sm">
-                              {photo.title || "Sin título"}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              <span className="font-semibold">Descripción:</span>{" "}
-                              {photo.description || "Sin descripción"}
-                            </p>
-                            <p className="text-xs text-gray-500 break-all">
-                              <span className="font-semibold">URL:</span>{" "}
-                              <a
-                                href={photo.imageUrl || photo.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="link link-primary"
-                              >
-                                {photo.imageUrl || photo.url}
-                              </a>
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              <span className="font-semibold">Año:</span>{" "}
-                              {photo.year ?? "No especificado"}
-                            </p>
-                          </div>
-                          <p className="text-xs font-semibold">
-                            Estado:{" "}
-                            <span
-                              className={
-                                photo.hidden
-                                  ? "text-amber-600"
-                                  : "text-emerald-600"
-                              }
-                            >
-                              {photo.hidden ? "Oculta" : "Visible"}
-                            </span>
-                          </p>
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            <button
-                              className={`btn btn-sm ${
-                                photo.hidden ? "btn-success" : "btn-warning"
-                              }`}
-                              disabled={
-                                togglingPhotoId === (photo._id || photo.id)
-                              }
-                              onClick={() => handleTogglePhotoVisibility(photo)}
-                              type="button"
-                            >
-                              {togglingPhotoId === (photo._id || photo.id) ? (
-                                "Actualizando..."
-                              ) : photo.hidden ? (
-                                <span className="flex items-center gap-2">
-                                  <FaEye /> Mostrar
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-2">
-                                  <FaEyeSlash /> Ocultar
-                                </span>
-                              )}
-                            </button>
-                            <button
-                              className="btn btn-sm btn-neutral"
-                              type="button"
-                              onClick={() => openEditModal(photo)}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              className="btn btn-sm btn-error"
-                              type="button"
-                              onClick={() => requestDeletePhoto(photo)}
-                              disabled={
-                                deletingPhotoId === (photo._id || photo.id)
-                              }
-                            >
-                              {deletingPhotoId === (photo._id || photo.id)
-                                ? "Eliminando..."
-                                : "Eliminar"}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : loadingAllPhotos ? (
-                <p>Cargando fotos...</p>
-              ) : photos.length === 0 ? (
-                <p className="opacity-60">No hay fotos para mostrar.</p>
-              ) : (
-                <PhotoGrid
-                  photos={photos}
-                  onUserClick={handlePhotoOwnerClick}
-                  onDeletePhoto={requestDeletePhoto}
-                  onToggleHidden={handleTogglePhotoVisibility}
-                  onEditPhoto={openEditModal}
-                  deletingPhotoId={deletingPhotoId}
-                  togglingPhotoId={togglingPhotoId}
-                />
-              )}
-            </div>
+            <AdminPhotosSection
+              selectedUser={selectedUser}
+              editingCountry={editingCountry}
+              countryDraft={countryDraft}
+              savingCountry={savingCountry}
+              onStartEditCountry={() => setEditingCountry(true)}
+              onCancelEditCountry={() => {
+                setEditingCountry(false);
+                setCountryDraft(selectedUser?.country || "");
+              }}
+              onCountrySelect={(code) => setCountryDraft(code)}
+              onSaveCountry={handleSaveCountry}
+              onShowAllPhotos={handleShowAllPhotos}
+              loadingPhotos={loadingPhotos}
+              userPhotos={userPhotos}
+              togglingPhotoId={togglingPhotoId}
+              deletingPhotoId={deletingPhotoId}
+              onTogglePhotoVisibility={handleTogglePhotoVisibility}
+              onEditPhoto={openEditModal}
+              onDeletePhoto={requestDeletePhoto}
+              loadingAllPhotos={loadingAllPhotos}
+              photos={photos}
+              onPhotoOwnerClick={handlePhotoOwnerClick}
+            />
           )}
           {activeSection === "estadisticas" && (
             <div>
@@ -1344,369 +824,36 @@ export default function Admin() {
         {/* La sección de fotos se muestra solo cuando se navega a "Fotos" desde el menú lateral */}
       </div>
 
-      <div className="drawer-side is-drawer-close:overflow-visible">
-        <label
-          htmlFor="my-drawer-4"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <div className="is-drawer-close:w-14 is-drawer-open:w-64 bg-base-200 flex flex-col items-start min-h-full">
-          {/* Sidebar content here */}
-          <ul className="menu w-full grow">
-            {/* HOME */}
-            <li>
-              <button
-                onClick={() => setActiveSection("home")}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Inicio"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="inline-block size-4 my-1.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 11L12 3l9 8" />
-                  <path d="M5 10v10h5v-5h4v5h5V10" />
-                </svg>
-                <span className="is-drawer-close:hidden">Inicio</span>
-              </button>
-            </li>
+      <AdminSidebar
+        onNavigate={setActiveSection}
+        onShowAllPhotos={handleShowAllPhotos}
+        onLogout={handleLogout}
+        onlineCount={onlineCount}
+      />
 
-            {/* list item */}
-            <li>
-              <button
-                onClick={() => setActiveSection("usuarios")}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Usuarios"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="inline-block size-4 my-1.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="7" r="4" />
-                  <path d="M5.5 21a7.5 7.5 0 0 1 13 0" />
-                </svg>
-                <span className="is-drawer-close:hidden flex items-center gap-2">
-                  Usuarios
-                  <span className="badge badge-success badge-sm">
-                    {onlineCount}
-                  </span>
-                </span>
-              </button>
-            </li>
+      <EditPhotoModal
+        editingPhoto={editingPhoto}
+        editForm={editForm}
+        editError={editError}
+        savingEdit={savingEdit}
+        onClose={closeEditModal}
+        onChange={handleEditInputChange}
+        onSubmit={handleSavePhotoEdit}
+      />
 
+      <ConfirmDeletePhotoModal
+        photoToDelete={photoToDelete}
+        deletingPhotoId={deletingPhotoId}
+        onCancel={() => setPhotoToDelete(null)}
+        onConfirm={handleConfirmDeletePhoto}
+      />
 
-            {/* list item */}
-            <li>
-              <button
-                onClick={handleShowAllPhotos}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Fotos"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="inline-block size-4 my-1.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 21h18"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m8 11 2 2 4-4 5 5"
-                  />
-                </svg>
-                <span className="is-drawer-close:hidden">Fotos</span>
-              </button>
-            </li>
-
-            {/* list item */}
-            <li>
-              <button
-                onClick={() => setActiveSection("facts")}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Facts"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="inline-block size-4 my-1.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.862 3.487a2.25 2.25 0 1 1 3.182 3.182L7.5 19.213 3 21l1.787-4.5L16.862 3.487Z"
-                  />
-                </svg>
-                <span className="is-drawer-close:hidden">Facts</span>
-              </button>
-            </li>
-
-            {/* list item */}
-            <li>
-              <button
-                onClick={() => setActiveSection("estadisticas")}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Estadisticas"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="inline-block size-4 my-1.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 3v18h18" />
-                  <path d="M18 17V9" />
-                  <path d="M13 17V5" />
-                  <path d="M8 17v-3" />
-                </svg>
-                <span className="is-drawer-close:hidden">Estadisticas</span>
-              </button>
-            </li>
-
-            {/* list item */}
-            <li>
-              <button
-                onClick={() => setActiveSection("settings")}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Settings"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                  fill="none"
-                  stroke="currentColor"
-                  className="inline-block size-4 my-1.5"
-                >
-                  <path d="M20 7h-9"></path>
-                  <path d="M14 17H5"></path>
-                  <circle cx="17" cy="17" r="3"></circle>
-                  <circle cx="7" cy="7" r="3"></circle>
-                </svg>
-                <span className="is-drawer-close:hidden">Settings</span>
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={handleLogout}
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Logout"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="inline-block size-4 my-1.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10v1"
-                  />
-                </svg>
-                <span className="is-drawer-close:hidden">Cerrar sesión</span>
-              </button>
-            </li>
-          </ul>
-
-          {/* button to open/close drawer */}
-          <div
-            className="m-2 is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            data-tip="Open"
-          >
-            <label
-              htmlFor="my-drawer-4"
-              className="btn btn-ghost btn-circle drawer-button is-drawer-open:rotate-y-180"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2"
-                fill="none"
-                stroke="currentColor"
-                className="inline-block size-4 my-1.5"
-              >
-                <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path>
-                <path d="M9 4v16"></path>
-                <path d="M14 10l2 2l-2 2"></path>
-              </svg>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {editingPhoto && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-2">Editar foto</h3>
-            <form className="space-y-4" onSubmit={handleSavePhotoEdit}>
-              <label className="form-control w-full">
-                <span className="label-text">Título</span>
-                <input
-                  type="text"
-                  name="title"
-                  className="input input-bordered w-full"
-                  value={editForm.title}
-                  onChange={handleEditInputChange}
-                  required
-                />
-              </label>
-
-              <label className="form-control w-full">
-                <span className="label-text">Descripción</span>
-                <textarea
-                  name="description"
-                  className="textarea textarea-bordered"
-                  value={editForm.description}
-                  onChange={handleEditInputChange}
-                  rows={3}
-                ></textarea>
-              </label>
-
-              <label className="form-control w-full">
-                <span className="label-text">Año</span>
-                <input
-                  type="number"
-                  name="year"
-                  className="input input-bordered w-full"
-                  value={editForm.year}
-                  onChange={handleEditInputChange}
-                  min="0"
-                />
-              </label>
-
-              {editError && (
-                <p className="text-sm text-error" role="alert">
-                  {editError}
-                </p>
-              )}
-
-              <div className="modal-action">
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={closeEditModal}
-                  disabled={savingEdit}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={savingEdit}
-                >
-                  {savingEdit ? "Guardando..." : "Guardar cambios"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </dialog>
-      )}
-
-      {photoToDelete && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">Eliminar foto</h3>
-            <p className="mb-4">
-              ¿Seguro que deseas eliminar{" "}
-              <strong>{photoToDelete.title || "esta foto"}</strong>? Esta acción
-              no se puede deshacer.
-            </p>
-            <div className="modal-action">
-              <button
-                type="button"
-                className="btn"
-                onClick={() => setPhotoToDelete(null)}
-                disabled={
-                  deletingPhotoId === (photoToDelete._id || photoToDelete.id)
-                }
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="btn btn-error"
-                onClick={handleConfirmDeletePhoto}
-                disabled={
-                  deletingPhotoId === (photoToDelete._id || photoToDelete.id)
-                }
-              >
-                {deletingPhotoId === (photoToDelete._id || photoToDelete.id)
-                  ? "Eliminando..."
-                  : "Eliminar"}
-              </button>
-            </div>
-          </div>
-        </dialog>
-      )}
-
-      {snapshotToDelete && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">
-              Eliminar mosaico
-            </h3>
-            <p className="mb-4">
-              ¿Seguro que deseas eliminar{" "}
-              <strong>{snapshotToDelete.mosaicKey || "este mosaico"}</strong>?
-              Se borrará definitivamente de la base de datos y de Cloudinary.
-            </p>
-            <div className="modal-action">
-              <button
-                type="button"
-                className="btn"
-                onClick={() => setSnapshotToDelete(null)}
-                disabled={deletingSnapshotId === snapshotToDelete._id}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="btn btn-error"
-                onClick={handleConfirmDeleteSnapshot}
-                disabled={deletingSnapshotId === snapshotToDelete._id}
-              >
-                {deletingSnapshotId === snapshotToDelete._id
-                  ? "Eliminando..."
-                  : "Eliminar"}
-              </button>
-            </div>
-          </div>
-        </dialog>
-      )}
+      <ConfirmDeleteSnapshotModal
+        snapshotToDelete={snapshotToDelete}
+        deletingSnapshotId={deletingSnapshotId}
+        onCancel={() => setSnapshotToDelete(null)}
+        onConfirm={handleConfirmDeleteSnapshot}
+      />
     </div>
   );
 }
