@@ -11,6 +11,7 @@ export default function LiveCamera() {
     <div className={`livecam-container ${isExpanded ? "expanded" : ""}`}>
       {/* Iframe del vídeo en directo */}
       <iframe
+        class="responsive-iframe"
         src="https://webcams.windy.com/webcams/public/embed/player/1448811166/day"
         title="Barcelona: Sagrada Família - Live Camera"
         allow="autoplay; fullscreen"

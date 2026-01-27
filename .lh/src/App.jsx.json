@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 2,
+            "activePatchIndex": 4,
             "patches": [
                 {
                     "date": 1765474613717,
@@ -16,6 +16,14 @@
                 {
                     "date": 1768158556891,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,8 +8,9 @@\n import EmailForm from \"./pages/EmailForm\";\n import MagicLinkVerification from \"./pages/MagicLinkVerification\";\n import UserRegistration from \"./pages/UserRegistration\";\n import RequestMagicLink from \"./pages/RequestMagicLink\";\n+import UserPage from \"./pages/UserPage\";\n \n // 🔹 Admin\n import Admin from \"./pages/Admin\";\n import AdminLogin from \"./components/admin/AdminLogin\";\n@@ -55,8 +56,9 @@\n         <Route path=\"/email\" element={<EmailForm />} />\n         <Route path=\"/verify\" element={<MagicLinkVerification />} />\n         <Route path=\"/register\" element={<UserRegistration />} />\n         <Route path=\"/magic\" element={<RequestMagicLink />} />\n+        <Route path=\"/userPage\" element={<UserPage />} />\n \n         {/* Admin */}\n         <Route\n           path=\"/admin\"\n"
+                },
+                {
+                    "date": 1769461514357,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -2,14 +2,15 @@\n import { BrowserRouter, Routes, Route, useLocation } from \"react-router-dom\";\n \n import Home from \"./pages/Home\";\n import Mosaic from \"./pages/Mosaic\";\n+import AddPhotos from \"./pages/AddPhoto\";\n+import Gallery from \"./pages/Gallery\";\n+import CookieBanner from \"./components/Cookies\";\n \n // 🔹 Magic Link / Registro\n import EmailForm from \"./pages/EmailForm\";\n-import MagicLinkVerification from \"./pages/MagicLinkVerification\";\n import UserRegistration from \"./pages/UserRegistration\";\n-import RequestMagicLink from \"./pages/RequestMagicLink\";\n import UserPage from \"./pages/UserPage\";\n \n // 🔹 Admin\n import Admin from \"./pages/Admin\";\n@@ -51,14 +52,16 @@\n       <Routes>\n         <Route path=\"/\" element={<Home toggleMode={toggleMode} />} />\n         <Route path=\"/mosaic\" element={<Mosaic />} />\n \n+        {/* RUTA DE LA GALERÍA DE COMUNIDAD */}\n+        <Route path=\"/gallery\" element={<Gallery />} />\n+\n         {/* Magic Link */}\n         <Route path=\"/email\" element={<EmailForm />} />\n-        <Route path=\"/verify\" element={<MagicLinkVerification />} />\n         <Route path=\"/register\" element={<UserRegistration />} />\n-        <Route path=\"/magic\" element={<RequestMagicLink />} />\n         <Route path=\"/userPage\" element={<UserPage />} />\n+        <Route path=\"/AddPhotos\" element={<AddPhotos />} />\n \n         {/* Admin */}\n         <Route\n           path=\"/admin\"\n"
+                },
+                {
+                    "date": 1769461674847,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -48,8 +48,9 @@\n   // --- Rutas ---\n   return (\n     <div className={`app-container ${mode}`}>\n       <OnlinePresenceConnector currentPath={location.pathname} />\n+      <CookieBanner />\n       <Routes>\n         <Route path=\"/\" element={<Home toggleMode={toggleMode} />} />\n         <Route path=\"/mosaic\" element={<Mosaic />} />\n \n"
                 }
             ],
             "date": 1765474613717,

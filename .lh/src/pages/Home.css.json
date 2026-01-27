@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 2,
+            "activePatchIndex": 3,
             "patches": [
                 {
                     "date": 1765474897740,
@@ -16,6 +16,10 @@
                 {
                     "date": 1768158764068,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -10,24 +10,31 @@\n }\n \n .user-page-link {\n   position: absolute;\n-  top: 10px;\n-  left: 10px;\n-  background-color: #007bff;\n-  color: white;\n-  padding: 10px 15px;\n-  border-radius: 5px;\n+  top: 15px;\n+  left: 15px;\n+  background-color: var(--accent);\n+  color: #ffffff;\n+  padding: 0.5rem 1rem;\n+  border-radius: 8px;\n   text-decoration: none;\n   font-size: 1rem;\n-  font-weight: bold;\n-  transition: background-color 0.3s ease;\n+  font-weight: 600;\n+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);\n+  transition: background-color 0.3s ease, transform 0.2s ease;\n }\n \n .user-page-link:hover {\n-  background-color: #0056b3;\n+  background-color: var(--accent-hover);\n+  transform: scale(1.05);\n }\n \n+.user-page-link:focus-visible {\n+  outline: 2px solid var(--accent-hover);\n+  outline-offset: 2px;\n+}\n+\n /* ========== THEME TOGGLE ========== */\n .theme-toggle {\n   background: transparent;\n   border: none;\n"
+                },
+                {
+                    "date": 1769454235425,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -66,8 +66,9 @@\n   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);\n   width: 92%;\n   max-width: 900px;\n   transition: background 0.6s ease;\n+  text-align: justify;\n }\n \n .intro-inner {\n   padding: 0.75rem 1rem;\n"
                 }
             ],
             "date": 1765474897740,

@@ -1,120 +1,83 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 import "./UserPage.css";
 
-const UserPage = () => {
+function UserPage() {
   const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    const verifyToken = async () => {
+    const load = async () => {
       try {
+        // 🔐 1. Verificar token
+        const verify = await axios.get(
+          `http://localhost:3000/emails/verify-token?token=${token}`
+        );
+
+        if (verify.data.action !== "edit") {
+          throw new Error("No autorizado");
+        }
+
+        const userEmail = verify.data.email;
+        setEmail(userEmail);
+
+        // 📸 2. Traer info + fotos del usuario
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/emails/verify-token?token=${encodeURIComponent(
-            token
-          )}`
+          "http://localhost:3000/emails/me/photos",
+          { params: { email: userEmail } }
         );
-        if (res.data?.email) {
-          localStorage.setItem("verifiedEmail", res.data.email.toLowerCase());
-        }
-        if (res.data?.token) {
-          localStorage.setItem("userToken", res.data.token);
-        }
-        if (res.data?.userId && res.data?.email) {
-          const userData = { _id: res.data.userId, email: res.data.email };
-          if (res.data?.country) {
-            userData.country = res.data.country;
-          }
-          localStorage.setItem("userData", JSON.stringify(userData));
-        }
+
+        setName(res.data.name);        // ✅ nombre
+        setPhotos(res.data.photos);    // ✅ fotos + likes
       } catch (err) {
-        console.error("Error verificando enlace:", err);
-        setError("El enlace no es válido o ha expirado.");
-      } finally {
-        setLoading(false);
+        console.error(err);
+        setError("No se pudo cargar tu información");
       }
     };
 
-    verifyToken();
-  }, [searchParams]);
+    load();
+  }, [token]);
 
-  // Fetch user's photos from the backend
-  /* useEffect(() => {
-    const fetchPhotos = async () => {
-      try {
-        const response = await fetch("/api/user/photos"); // Reemplazar por nuestro endpoint
-        const data = await response.json();
-        setPhotos(data);
-      } catch (error) {
-        console.error("Error fetching photos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPhotos();
-  }, []);
-  */
-
-  // Handle photo deletion
-  const handleDelete = async (photoId) => {
-    try {
-      const response = await fetch(`/api/user/photos/${photoId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setPhotos((prevPhotos) =>
-          prevPhotos.filter((photo) => photo.id !== photoId)
-        );
-      } else {
-        console.error("Failed to delete photo");
-      }
-    } catch (error) {
-      console.error("Error deleting photo:", error);
-    }
-  };
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="user-page">
-      <div className="user-page-header">
-        <h1>Tus fotos compartidas de la Sagrada Familia</h1>
+      <h2>📸 Tus fotos</h2>
+
+      <div className="user-meta">
+        <p><strong>{name}</strong></p>
+        <p>{email}</p>
       </div>
 
-      {loading ? (
-        <p>Cargando todas tus fotos...</p>
-      ) : error ? (
-        <p className="error">{error}</p>
-      ) : photos.length === 0 ? (
-        <div className="empty-state">
-          <p>Aún no has compartido ninguna foto</p>
-        </div>
-      ) : (
-        <div className="photo-grid">
-          {photos.map((photo) => (
-            <div className="photo-card" key={photo.id}>
-              <img src={photo.url} alt={photo.title || "User photo"} />
-              <button
-                className="delete-button"
-                onClick={() => handleDelete(photo.id)}
-              >
-                Delete
-              </button>
+      <div className="user-actions">
+        <button onClick={() => (window.location.href = "/")}>Home</button>
+        <button onClick={() => (window.location.href = "/gallery")}>Galería</button>
+        <button onClick={() => (window.location.href = "/mosaic")}>Mosaico</button>
+      </div>
+
+      <div className="photos-grid">
+        {photos.map((photo) => (
+          <div key={photo._id} className="photo-card">
+            <img
+              src={photo.imageUrl}
+              alt={photo.title || "Foto"}
+            />
+            <div className="photo-info">
+              <h4>{photo.title}</h4>
+              <p>{photo.description}</p>
+              <span className="likes">❤️ {photo.likes || 0}</span>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
-};
+}
 
 export default UserPage;
