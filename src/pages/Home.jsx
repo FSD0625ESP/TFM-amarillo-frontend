@@ -61,11 +61,11 @@ export default function Home() {
   }, []);
 
   // Theme automático por hora
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 21 || hour < 6) setTheme("sunset");
-    else setTheme("day");
-  }, []);
+  // useEffect(() => {
+  //   const hour = new Date().getHours();
+  //   if (hour >= 21 || hour < 6) setTheme("sunset");
+  //   else setTheme("day");
+  // }, []);
 
   // Aplicar el tema
   useEffect(() => {
