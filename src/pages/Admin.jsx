@@ -47,6 +47,7 @@ export default function Admin() {
   const [mainImageAspect, setMainImageAspect] = useState(null);
   const [mosaicBusy, setMosaicBusy] = useState(false);
   const [allowReuse, setAllowReuse] = useState(true);
+  const [reuseAfterExhaustion, setReuseAfterExhaustion] = useState(false);
   const [mosaicError, setMosaicError] = useState("");
   const [mosaicSnapshot, setMosaicSnapshot] = useState(null);
   const [mainImageUrl, setMainImageUrl] = useState("");
@@ -66,6 +67,7 @@ export default function Admin() {
   const [savingConfig, setSavingConfig] = useState(false);
   const [intervalHours, setIntervalHours] = useState(24);
   const [refreshSeconds, setRefreshSeconds] = useState(30);
+  const [concurrency, setConcurrency] = useState(3);
 
   const handleSaveCountry = async () => {
     if (!selectedUser?.id || !countryDraft) return;
@@ -448,6 +450,7 @@ export default function Admin() {
       await axios.post(`${API_URL}/mosaic/tiles/match`, {
         mosaicKey: mosaicKey.trim(),
         allowReuse,
+        reuseAfterExhaustion,
       });
       const { data } = await axios.post(`${API_URL}/mosaic/render`, {
         mosaicKey: mosaicKey.trim(),
@@ -455,6 +458,7 @@ export default function Admin() {
         outputHeight,
         folder: "Mosaic",
         format: "jpg",
+        concurrency: Number(concurrency) || 3,
       });
       setMosaicSnapshot(data?.snapshot || null);
       fetchMosaicSnapshots();
@@ -488,6 +492,12 @@ export default function Admin() {
         setMosaicHeight(data.mosaicSize);
       }
       if (data.intervalHours) setIntervalHours(data.intervalHours);
+      if (data.concurrency) {
+        const parsedConcurrency = Number(data.concurrency);
+        if (Number.isFinite(parsedConcurrency) && parsedConcurrency > 0) {
+          setConcurrency(parsedConcurrency);
+        }
+      }
       if (typeof data.useAutoRatio === "boolean") {
         setUseAutoRatio(data.useAutoRatio);
       }
@@ -499,6 +509,9 @@ export default function Admin() {
       }
       if (typeof data.allowReuse === "boolean") {
         setAllowReuse(data.allowReuse);
+      }
+      if (typeof data.reuseAfterExhaustion === "boolean") {
+        setReuseAfterExhaustion(data.reuseAfterExhaustion);
       }
       setConfigLoaded(true);
     } catch (err) {
@@ -566,10 +579,12 @@ export default function Admin() {
           mosaicSize: width,
           useAutoRatio,
           allowReuse,
+          reuseAfterExhaustion,
           intervalHours: Number(intervalHours) || 24,
           refreshSeconds: Number.isFinite(Number(refreshSeconds))
             ? Number(refreshSeconds)
             : 30,
+          concurrency: Number(concurrency) || 3,
         });
       }
     } catch (err) {
@@ -609,10 +624,12 @@ export default function Admin() {
         mosaicSize: width,
         useAutoRatio,
         allowReuse,
+        reuseAfterExhaustion,
         intervalHours: Number(intervalHours) || 24,
         refreshSeconds: Number.isFinite(Number(refreshSeconds))
           ? Number(refreshSeconds)
           : 30,
+        concurrency: Number(concurrency) || 3,
       });
       setAutoEnabled(Boolean(data?.enabled));
       setConfigLoaded(true);
@@ -653,10 +670,12 @@ export default function Admin() {
         mosaicSize: width,
         useAutoRatio,
         allowReuse,
+        reuseAfterExhaustion,
         intervalHours: Number(intervalHours) || 24,
         refreshSeconds: Number.isFinite(Number(refreshSeconds))
           ? Number(refreshSeconds)
           : 30,
+        concurrency: Number(concurrency) || 3,
       });
       setAutoEnabled(Boolean(data?.enabled));
       setConfigLoaded(true);
@@ -751,6 +770,8 @@ export default function Admin() {
               resolvedHeight={resolvedHeight}
               allowReuse={allowReuse}
               onAllowReuseChange={setAllowReuse}
+              reuseAfterExhaustion={reuseAfterExhaustion}
+              onReuseAfterExhaustionChange={setReuseAfterExhaustion}
               autoEnabled={autoEnabled}
               onAutoEnabledChange={handleToggleAuto}
               savingAuto={savingAuto}
@@ -758,6 +779,8 @@ export default function Admin() {
               onIntervalHoursChange={setIntervalHours}
               refreshSeconds={refreshSeconds}
               onRefreshSecondsChange={setRefreshSeconds}
+              concurrency={concurrency}
+              onConcurrencyChange={setConcurrency}
               onSaveAutoConfig={handleSaveAutoConfig}
               savingConfig={savingConfig}
               onGenerateTiles={handleGenerateTiles}

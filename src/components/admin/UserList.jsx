@@ -37,12 +37,19 @@ export default function UserList({
     return onlineByEmail.has(email) || (id && onlineById.has(String(id)));
   };
 
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/emails`);
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Error cargando usuarios:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get(`${API_BASE}/emails`)
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error("Error cargando usuarios:", err))
-      .finally(() => setLoading(false));
+    fetchUsers();
   }, []);
 
   const openDeleteModal = (user) => setModalUser(user);
@@ -59,6 +66,7 @@ export default function UserList({
       closeDeleteModal();
     }
   };
+
 
   useEffect(() => {
     if (focusUser?.email) {
@@ -113,7 +121,8 @@ export default function UserList({
               <tr className="text-lg">
                 <th>Email</th>
                 <th>Estado</th>
-                <th>Fotos subidas</th>
+                <th>Fotos activas</th>
+                <th>Fotos ocultas</th>
                 <th className="text-center">Acciones</th>
               </tr>
             </thead>
@@ -137,7 +146,8 @@ export default function UserList({
                         <span className="badge badge-ghost">Offline</span>
                       )}
                     </td>
-                    <td>{u.photosCount ?? 0}</td>
+                    <td>{u.photosActiveCount ?? u.photosCount ?? 0}</td>
+                    <td>{u.photosHiddenCount ?? 0}</td>
                     <td className="text-center">
                       <div className="flex gap-2 justify-center items-center">
                       <button
@@ -196,6 +206,8 @@ export default function UserList({
           <div className="modal-box">
             <h3 className="font-bold text-lg">Eliminar usuario</h3>
             <p className="py-4">
+              Esta acción eliminará todos los datos del usuario y no se puede deshacer.
+              <br />
               ¿Estás seguro de que deseas eliminar a{" "}
               <strong>{modalUser.email}</strong>?
             </p>

@@ -23,6 +23,8 @@ export default function AdminHome({
   resolvedHeight,
   allowReuse,
   onAllowReuseChange,
+  reuseAfterExhaustion,
+  onReuseAfterExhaustionChange,
   autoEnabled,
   onAutoEnabledChange,
   savingAuto,
@@ -30,6 +32,8 @@ export default function AdminHome({
   onIntervalHoursChange,
   refreshSeconds,
   onRefreshSecondsChange,
+  concurrency,
+  onConcurrencyChange,
   onSaveAutoConfig,
   savingConfig,
   onGenerateTiles,
@@ -232,6 +236,21 @@ export default function AdminHome({
             <label className="mosaic-checkbox">
               <input
                 type="checkbox"
+                checked={reuseAfterExhaustion}
+                onChange={(e) => onReuseAfterExhaustionChange(e.target.checked)}
+                className="checkbox checkbox-sm"
+                disabled={allowReuse}
+              />
+              <span
+                className="mosaic-tooltip"
+                data-tooltip="Usa cada foto una vez y luego vuelve a reutilizar cuando se agotan."
+              >
+                Reusar al agotar
+              </span>
+            </label>
+            <label className="mosaic-checkbox">
+              <input
+                type="checkbox"
                 checked={autoEnabled}
                 onChange={(e) => onAutoEnabledChange(e.target.checked)}
                 className="checkbox checkbox-sm"
@@ -268,6 +287,23 @@ export default function AdminHome({
                 step="1"
                 value={refreshSeconds}
                 onChange={(e) => onRefreshSecondsChange(e.target.value)}
+                className="input input-bordered input-xs"
+              />
+            </label>
+            <label className="mosaic-inline-field">
+              <span
+                className="mosaic-inline-label mosaic-tooltip"
+                data-tooltip="Número de tiles que se procesan en paralelo al renderizar el mosaico."
+              >
+                Concurrency
+              </span>
+              <input
+                type="number"
+                min="1"
+                max="16"
+                step="1"
+                value={concurrency}
+                onChange={(e) => onConcurrencyChange(e.target.value)}
                 className="input input-bordered input-xs"
               />
             </label>
