@@ -98,6 +98,9 @@ function UserRegistration() {
         const res = await axios.get(
           `http://localhost:3000/emails/verify-token?token=${token}`
         );
+
+        localStorage.setItem("userToken", res.data.token);
+
         setEmail(res.data.email);
         if (res.data.email) {
           localStorage.setItem("verifiedEmail", res.data.email.toLowerCase());

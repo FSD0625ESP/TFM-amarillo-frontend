@@ -6,7 +6,7 @@ import iconNacimiento from "../assets/iconNacimiento.png";
 import iconPasion from "../assets/iconPasion.png";
 import FactSection from "../components/FactSection";
 import useOnlineUsers from "../hooks/useOnlineUsers";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MosaicProgressBar from "../components/MosaicProgressBar";
 import LiveCamera from "../components/LiveCamera";
 import { getHighlightedPhotos } from "../services/photoService";
@@ -14,12 +14,26 @@ import { getPublicStats } from "../services/statsService";
 import AboutModal from "../components/AboutModal";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("userToken");
+
+ const goToUserPage = () => {
+  const token = localStorage.getItem("userToken");
+
+  if (!token || token === "null" || token === "undefined") {
+    navigate("/email"); // placeholder
+    return;
+  }
+
+  navigate("/userPage");
+};
+
+
   const {
     total: onlineTotal = 0,
     anonymousCount = 0,
     count: registeredOnline = 0,
   } = useOnlineUsers();
-
   const [theme, setTheme] = useState("day");
   const [stats, setStats] = useState({
     fotos: 0,
@@ -28,7 +42,6 @@ export default function Home() {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState("");
-
   // Estado para controlar el modal AboutModal
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
@@ -60,19 +73,6 @@ export default function Home() {
     fetchStats();
   }, []);
 
-  // Theme automático por hora
-  // useEffect(() => {
-  //   const hour = new Date().getHours();
-  //   if (hour >= 21 || hour < 6) setTheme("sunset");
-  //   else setTheme("day");
-  // }, []);
-
-  // // Aplicar el tema
-  // useEffect(() => {
-  //   document.documentElement.setAttribute("data-theme", theme);
-  // }, [theme]);
-
-  // Fotos destacadas
   const [highlighted, setHighlighted] = useState(null);
   const [slideCount, setSlideCount] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -97,7 +97,7 @@ export default function Home() {
 
     fetchHighlighted();
   }, []);
-
+  
   // Autoplay SIN hash, SIN scroll //
   useEffect(() => {
     if (!highlighted || slideCount === 0) return;
@@ -111,9 +111,11 @@ export default function Home() {
 
   return (
     <main className="home">
-      <Link to="/userPage" className="user-page-link">
-        Mis Fotos
-      </Link>
+      <button onClick={goToUserPage}
+       className="user-page-link"
+      >
+  Mis Fotos
+</button>
 
       <button
         className="theme-toggle"
@@ -156,9 +158,11 @@ export default function Home() {
           </p>
 
           <div className="intro-cta">
+            {(!token || token === "null" || token === "undefined") && (
             <Link to="/email" className="btn btn-primary">
               Colabora con tu foto
             </Link>
+            )}
             <Link to="/mosaic" className="btn btn-primary">
               Ver el mosaico
             </Link>

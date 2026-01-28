@@ -30,11 +30,20 @@ export const getPhotoYears = async () => {
 
 export const likePhoto = async (photoId) => {
   const token = localStorage.getItem("userToken");
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const { data } = await axios.patch(
+
+  if (!token) {
+    throw new Error("No autenticado");
+  }
+
+  const res = await axios.patch(
     `${API_URL}/photos/${photoId}/like`,
     {},
-    { headers }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
-  return data;
+
+  return res.data;
 };

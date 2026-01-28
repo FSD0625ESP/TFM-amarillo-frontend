@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Modal from "react-modal";
 import "./UserPage.css";
@@ -8,14 +7,11 @@ import "./UserRegistration.css";
 Modal.setAppElement("#root");
 
 function UserPage() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState("");
-
+  const token = localStorage.getItem("userToken");
   // modal + form
   const [modalOpen, setModalOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -24,41 +20,47 @@ function UserPage() {
   const CURRENT_YEAR = new Date().getFullYear();
   const YEAR_OPTIONS = Array.from(
     { length: CURRENT_YEAR - START_YEAR + 1 },
-    (_, i) => START_YEAR - i
+    (_, i) => START_YEAR + i
   );
   const [year, setYear] = useState("");
   const [files, setFiles] = useState([]);
 
-  // 🔐 Cargar usuario + fotos
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const verify = await axios.get(
-          `http://localhost:3000/emails/verify-token?token=${token}`
-        );
+useEffect(() => {
+  const token = localStorage.getItem("userToken");
 
-        if (verify.data.action !== "edit") {
-          throw new Error("No autorizado");
-        }
+if (!token) {
+  setError("Sesión inválida o expirada");
+  return;
+}
 
-        const userEmail = verify.data.email;
-        setEmail(userEmail);
 
-        const res = await axios.get(
-          "http://localhost:3000/emails/me/photos",
-          { params: { email: userEmail } }
-        );
+  const headers = {
+  Authorization: `Bearer ${token}`,
+};
 
-        setName(res.data.name);
-        setPhotos(res.data.photos);
-      } catch (err) {
-        console.error(err);
-        setError("No se pudo cargar tu información");
-      }
-    };
 
-    load();
-  }, [token]);
+  const load = async () => {
+    const userRes = await axios.get(
+      "http://localhost:3000/emails/me",
+      { headers }
+    );
+
+    setName(userRes.data.name);
+    setEmail(userRes.data.email);
+
+    const photosRes = await axios.get(
+      "http://localhost:3000/emails/me/photos",
+      { headers }
+    );
+
+    setPhotos(photosRes.data.photos);
+  };
+
+  load();
+}, []);
+
+
+
 
   // 📤 SUBIR FOTO NUEVA
   const handleAddPhoto = async (e) => {
@@ -73,11 +75,19 @@ function UserPage() {
 
     files.forEach((file) => data.append("photos", file));
 
-    await axios.post(
-      "http://localhost:3000/emails/add-photos",
-      data,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+   const token = localStorage.getItem("userToken");
+
+await axios.post(
+  "http://localhost:3000/emails/add-photos",
+  data,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
 
     // limpiar
     setModalOpen(false);
@@ -88,9 +98,13 @@ function UserPage() {
 
     // recargar fotos
     const res = await axios.get(
-      "http://localhost:3000/emails/me/photos",
-      { params: { email } }
-    );
+  "http://localhost:3000/emails/me/photos",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
     setPhotos(res.data.photos);
   } catch (err) {
     console.error(err);
@@ -114,7 +128,7 @@ function UserPage() {
         <button onClick={() => (window.location.href = "/")}>Home</button>
         <button onClick={() => (window.location.href = "/gallery")}>Galería</button>
         <button onClick={() => (window.location.href = "/mosaic")}>Mosaico</button>
-        <button onClick={() => setModalOpen(true)}>➕ Agregar foto</button>
+        <button onClick={() => setModalOpen(true)}> Agregar foto</button>
       </div>
 
       <div className="photos-grid">
@@ -136,7 +150,7 @@ function UserPage() {
   className="modal-content"
   overlayClassName="modal-overlay"
 >
-  <h2>➕ Añadir nueva foto</h2>
+  <h2> Añadir nueva foto</h2>
 
   <form onSubmit={handleAddPhoto}>
     {/* TÍTULO */}

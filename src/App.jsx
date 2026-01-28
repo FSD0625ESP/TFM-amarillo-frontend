@@ -9,8 +9,8 @@ import CookieBanner from "./components/Cookies";
 // 🔹 Magic Link / Registro
 import EmailForm from "./pages/EmailForm";
 import UserRegistration from "./pages/UserRegistration";
+import AuthRedirect from "./pages/AuthRedirect";
 import UserPage from "./pages/UserPage";
-
 // 🔹 Admin
 import Admin from "./pages/Admin";
 import AdminLogin from "./components/admin/AdminLogin";
@@ -59,8 +59,9 @@ function AppContent() {
         {/* Magic Link */}
         <Route path="/email" element={<EmailForm />} />
         <Route path="/register" element={<UserRegistration />} />
-        <Route path="/userPage" element={<UserPage />} />
+        <Route path="/auth" element={<AuthRedirect />} />
         <Route path="/AddPhotos" element={<AddPhotos />} />
+        <Route path="/userPage" element={<UserPage />} />
 
         {/* Admin */}
         <Route
