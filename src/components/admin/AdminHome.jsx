@@ -53,6 +53,14 @@ export default function AdminHome({
   onSharpnessChange,
   overlayOpacity,
   onOverlayOpacityChange,
+  matchPoolSize,
+  onMatchPoolSizeChange,
+  minUseOnce,
+  onMinUseOnceChange,
+  maxUsesPerPhoto,
+  onMaxUsesPerPhotoChange,
+  limitUsesEnabled,
+  onLimitUsesEnabledChange,
 }) {
   const safeSharpness = Number.isFinite(Number(sharpness))
     ? Number(sharpness)
@@ -133,99 +141,98 @@ export default function AdminHome({
           )}
         </div>
 
-        {/* Grid de Configuración Numérica */}
-        <div className="mosaic-grid">
-          <label>
-            <span
-              className="mosaic-tooltip"
-              data-tooltip="Ancho de cada tile (cuadradito) en píxeles. Ej: 20 = 20px."
-            >
-              Tile width (px)
-            </span>
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={tileWidth}
-              onChange={(e) => onTileWidthChange(e.target.value)}
-              className="input input-bordered input-sm"
-            />
-          </label>
-          <label>
-            <span
-              className="mosaic-tooltip"
-              data-tooltip="Alto de cada tile en píxeles. Ej: 20 = 20px."
-            >
-              Tile height (px)
-            </span>
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={tileHeight}
-              onChange={(e) => onTileHeightChange(e.target.value)}
-              className="input input-bordered input-sm"
-            />
-          </label>
-          <label>
-            <span
-              className="mosaic-tooltip"
-              data-tooltip="Identificador del mosaico. Sirve para separar mosaicos distintos."
-            >
-              mosaicKey
-            </span>
-            <input
-              type="text"
-              value={mosaicKey}
-              onChange={(e) => onMosaicKeyChange(e.target.value)}
-              className="input input-bordered input-sm"
-              placeholder="default"
-            />
-          </label>
-          <label>
-            <span
-              className="mosaic-tooltip"
-              data-tooltip="Ancho final de la imagen del mosaico. Recomendado: 4000px o 5000px."
-            >
-              Ancho Final (px)
-            </span>
-            <input
-              type="number"
-              min="200"
-              step="100"
-              value={mosaicWidth}
-              onChange={(e) => onMosaicWidthChange(e.target.value)}
-              className="input input-bordered input-sm"
-            />
-          </label>
-          <label>
-            <span
-              className="mosaic-tooltip"
-              data-tooltip={
-                useAutoRatio
-                  ? "Se calcula automáticamente con la imagen principal."
-                  : "Alto final de la imagen del mosaico."
-              }
-            >
-              Alto Final (px)
-            </span>
-            <input
-              type="number"
-              min="200"
-              step="100"
-              value={useAutoRatio ? resolvedHeight : mosaicHeight}
-              onChange={(e) => onMosaicHeightChange(e.target.value)}
-              className="input input-bordered input-sm"
-              disabled={useAutoRatio}
-            />
-          </label>
+        <div className="mosaic-section">
+          <h3 className="mosaic-section-title">Configuración base</h3>
+          <div className="mosaic-grid">
+            <label>
+              <span
+                className="mosaic-tooltip"
+                data-tooltip="Ancho de cada tile (cuadradito) en píxeles. Ej: 20 = 20px."
+              >
+                Tile width (px)
+              </span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={tileWidth}
+                onChange={(e) => onTileWidthChange(e.target.value)}
+                className="input input-bordered input-sm"
+              />
+            </label>
+            <label>
+              <span
+                className="mosaic-tooltip"
+                data-tooltip="Alto de cada tile en píxeles. Ej: 20 = 20px."
+              >
+                Tile height (px)
+              </span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={tileHeight}
+                onChange={(e) => onTileHeightChange(e.target.value)}
+                className="input input-bordered input-sm"
+              />
+            </label>
+            <label>
+              <span
+                className="mosaic-tooltip"
+                data-tooltip="Identificador del mosaico. Sirve para separar mosaicos distintos."
+              >
+                mosaicKey
+              </span>
+              <input
+                type="text"
+                value={mosaicKey}
+                onChange={(e) => onMosaicKeyChange(e.target.value)}
+                className="input input-bordered input-sm"
+                placeholder="default"
+              />
+            </label>
+            <label>
+              <span
+                className="mosaic-tooltip"
+                data-tooltip="Ancho final de la imagen del mosaico. Recomendado: 4000px o 5000px."
+              >
+                Ancho Final (px)
+              </span>
+              <input
+                type="number"
+                min="200"
+                step="100"
+                value={mosaicWidth}
+                onChange={(e) => onMosaicWidthChange(e.target.value)}
+                className="input input-bordered input-sm"
+              />
+            </label>
+            <label>
+              <span
+                className="mosaic-tooltip"
+                data-tooltip={
+                  useAutoRatio
+                    ? "Se calcula automáticamente con la imagen principal."
+                    : "Alto final de la imagen del mosaico."
+                }
+              >
+                Alto Final (px)
+              </span>
+              <input
+                type="number"
+                min="200"
+                step="100"
+                value={useAutoRatio ? resolvedHeight : mosaicHeight}
+                onChange={(e) => onMosaicHeightChange(e.target.value)}
+                className="input input-bordered input-sm"
+                disabled={useAutoRatio}
+              />
+            </label>
+          </div>
         </div>
 
-        {/* NUEVA SECCIÓN: Ajustes de Calidad Visual */}
-        <div className="p-4 bg-base-200 rounded-lg mt-4 mb-4">
-          <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
-            Calidad Visual y Mezcla
-          </h3>
+        <div className="mosaic-section mosaic-quality">
+          <h3 className="mosaic-section-title">Calidad visual y mezcla</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Control de Nitidez */}
@@ -282,8 +289,9 @@ export default function AdminHome({
           </div>
         </div>
 
-        <div className="mosaic-actions">
-          <div className="mosaic-checkboxes">
+        <div className="mosaic-section">
+          <h3 className="mosaic-section-title">Match y reutilización</h3>
+          <div className="mosaic-toggle-grid">
             <label className="mosaic-checkbox">
               <input
                 type="checkbox"
@@ -322,6 +330,69 @@ export default function AdminHome({
                 Reusar al agotar
               </span>
             </label>
+            <label className="mosaic-inline-field">
+              <span
+                className="mosaic-inline-label mosaic-tooltip"
+                data-tooltip="Cantidad de mejores candidatos que se consideran por tile."
+              >
+                Match pool
+              </span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={matchPoolSize}
+                onChange={(e) =>
+                  onMatchPoolSizeChange?.(Number(e.target.value))
+                }
+                className="input input-bordered input-xs"
+              />
+            </label>
+            <label className="mosaic-checkbox">
+              <input
+                type="checkbox"
+                checked={minUseOnce}
+                onChange={(e) => onMinUseOnceChange?.(e.target.checked)}
+                className="checkbox checkbox-sm"
+              />
+              Usar todas al menos 1 vez
+            </label>
+            <label className="mosaic-inline-field">
+              <span
+                className="mosaic-inline-label mosaic-tooltip"
+                data-tooltip="Máximo de repeticiones por foto (vacío = sin límite)."
+              >
+                Máx. usos
+              </span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={maxUsesPerPhoto ?? ""}
+                onChange={(e) =>
+                  onMaxUsesPerPhotoChange?.(
+                    e.target.value === "" ? null : Number(e.target.value)
+                  )
+                }
+                disabled={!limitUsesEnabled}
+                className="input input-bordered input-xs"
+              />
+            </label>
+            <label className="mosaic-checkbox">
+              <input
+                type="checkbox"
+                checked={limitUsesEnabled}
+                onChange={(e) => onLimitUsesEnabledChange?.(e.target.checked)}
+                className="checkbox checkbox-sm"
+              />
+              Limitar usos
+            </label>
+          </div>
+        </div>
+
+        <div className="mosaic-section">
+          <h3 className="mosaic-section-title">Automatización</h3>
+          <div className="mosaic-toggle-grid">
             <label className="mosaic-checkbox">
               <input
                 type="checkbox"
@@ -390,6 +461,9 @@ export default function AdminHome({
               {savingConfig ? "Guardando..." : "Guardar config"}
             </button>
           </div>
+        </div>
+
+        <div className="mosaic-actions-bar">
           <div className="mosaic-buttons">
             <button
               type="button"
@@ -491,10 +565,61 @@ export default function AdminHome({
                         {snapshot.width || snapshot.outputWidth || "?"} x{" "}
                         {snapshot.height || snapshot.outputHeight || "?"}
                       </p>
-                      {snapshotDate && (
-                        <p className="mosaic-snapshot-date">{snapshotDate}</p>
-                      )}
-                    </div>
+                {snapshotDate && (
+                  <p className="mosaic-snapshot-date">{snapshotDate}</p>
+                )}
+                <details
+                  className="mosaic-snapshot-details"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <summary
+                    className="btn btn-ghost btn-xs"
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    Ver más
+                  </summary>
+                  <div className="mosaic-snapshot-config">
+                    <p>
+                      <strong>Tiles:</strong>{" "}
+                      {snapshot.config?.tileWidth || "?"} x{" "}
+                      {snapshot.config?.tileHeight || "?"}
+                    </p>
+                    <p>
+                      <strong>Match pool:</strong>{" "}
+                      {snapshot.config?.matchPoolSize ?? "?"}
+                    </p>
+                    <p>
+                      <strong>Usar todas:</strong>{" "}
+                      {snapshot.config?.minUseOnce ? "Sí" : "No"}
+                    </p>
+                    <p>
+                      <strong>Máx. usos:</strong>{" "}
+                      {snapshot.config?.maxUsesPerPhoto ?? "Sin límite"}
+                    </p>
+                    <p>
+                      <strong>Reutilizar:</strong>{" "}
+                      {snapshot.config?.allowReuse ? "Sí" : "No"}
+                    </p>
+                    <p>
+                      <strong>Reusar al agotar:</strong>{" "}
+                      {snapshot.config?.reuseAfterExhaustion ? "Sí" : "No"}
+                    </p>
+                    <p>
+                      <strong>Nitidez:</strong>{" "}
+                      {snapshot.config?.sharpness ?? 0}%
+                    </p>
+                    <p>
+                      <strong>Overlay:</strong>{" "}
+                      {snapshot.config?.overlayOpacity ?? 0}%
+                    </p>
+                    <p>
+                      <strong>Concurrency:</strong>{" "}
+                      {snapshot.config?.concurrency ?? "?"}
+                    </p>
+                  </div>
+                </details>
+              </div>
                     {canDelete && (
                       <button
                         type="button"

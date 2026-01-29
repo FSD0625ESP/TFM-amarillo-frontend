@@ -24,6 +24,8 @@ export default function Admin() {
   const [focusedUser, setFocusedUser] = useState(null);
   const [usersByEmail, setUsersByEmail] = useState({});
   const [loadingAllPhotos, setLoadingAllPhotos] = useState(true);
+  const [usablePhotosCount, setUsablePhotosCount] = useState(null);
+  const [loadingUsablePhotos, setLoadingUsablePhotos] = useState(false);
   const [deletingPhotoId, setDeletingPhotoId] = useState(null);
   const [togglingPhotoId, setTogglingPhotoId] = useState(null);
   const [editingPhoto, setEditingPhoto] = useState(null);
@@ -74,6 +76,10 @@ export default function Admin() {
   // --- NUEVOS ESTADOS DE CALIDAD ---
   const [sharpness, setSharpness] = useState(0);       // Nitidez
   const [overlayOpacity, setOverlayOpacity] = useState(20); // Mezcla
+  const [matchPoolSize, setMatchPoolSize] = useState(5);
+  const [minUseOnce, setMinUseOnce] = useState(true);
+  const [maxUsesPerPhoto, setMaxUsesPerPhoto] = useState(null);
+  const [limitUsesEnabled, setLimitUsesEnabled] = useState(false);
 
   const handleSaveCountry = async () => {
     if (!selectedUser?.id || !countryDraft) return;
@@ -148,9 +154,28 @@ export default function Admin() {
     }
   }, []);
 
+  const fetchUsablePhotosCount = useCallback(async () => {
+    setLoadingUsablePhotos(true);
+    try {
+      const { data } = await axios.get(`${API_URL}/stats/usable-photos`);
+      setUsablePhotosCount(
+        Number.isFinite(Number(data?.count)) ? Number(data.count) : 0
+      );
+    } catch (err) {
+      console.error("Error obteniendo fotos utilizables:", err);
+      setUsablePhotosCount(null);
+    } finally {
+      setLoadingUsablePhotos(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchAllPhotos();
   }, [fetchAllPhotos]);
+
+  useEffect(() => {
+    fetchUsablePhotosCount();
+  }, [fetchUsablePhotosCount]);
 
   useEffect(() => {
     const fetchUsersIndex = async () => {
@@ -329,6 +354,7 @@ export default function Admin() {
       await axios.delete(`${API_URL}/photos/${photoId}`);
       removePhotoFromState(photoId);
       setPhotoToDelete(null);
+      fetchUsablePhotosCount();
     } catch (err) {
       console.error("Error eliminando foto:", err);
       alert("No se pudo eliminar la foto. Intenta nuevamente.");
@@ -346,6 +372,7 @@ export default function Admin() {
         hidden: !photo.hidden,
       });
       applyPhotoUpdate(data);
+      fetchUsablePhotosCount();
     } catch (err) {
       console.error("Error cambiando visibilidad:", err);
       alert(
@@ -465,6 +492,13 @@ export default function Admin() {
         reuseAfterExhaustion,
         sharpness: clampPercent(sharpness, 0),
         overlayOpacity: clampPercent(overlayOpacity, 0),
+        matchPoolSize: Number(matchPoolSize) || 5,
+        minUseOnce: Boolean(minUseOnce),
+        maxUsesPerPhoto: limitUsesEnabled
+          ? Number.isFinite(Number(maxUsesPerPhoto)) && Number(maxUsesPerPhoto) > 0
+            ? Math.floor(Number(maxUsesPerPhoto))
+            : null
+          : null,
       });
       const { data } = await axios.post(`${API_URL}/mosaic/render`, {
         mosaicKey: mosaicKey.trim(),
@@ -528,6 +562,25 @@ export default function Admin() {
       }
       if (typeof data.reuseAfterExhaustion === "boolean") {
         setReuseAfterExhaustion(data.reuseAfterExhaustion);
+      }
+      if (data.matchPoolSize !== undefined && data.matchPoolSize !== null) {
+        const parsedPool = Number(data.matchPoolSize);
+        if (Number.isFinite(parsedPool) && parsedPool > 0) {
+          setMatchPoolSize(parsedPool);
+        }
+      }
+      if (typeof data.minUseOnce === "boolean") {
+        setMinUseOnce(data.minUseOnce);
+      }
+      if (data.maxUsesPerPhoto !== undefined && data.maxUsesPerPhoto !== null) {
+        const parsedMaxUses = Number(data.maxUsesPerPhoto);
+        if (Number.isFinite(parsedMaxUses) && parsedMaxUses > 0) {
+          setMaxUsesPerPhoto(parsedMaxUses);
+          setLimitUsesEnabled(true);
+        }
+      } else {
+        setMaxUsesPerPhoto(null);
+        setLimitUsesEnabled(false);
       }
       
       // --- CARGAR CALIDAD ---
@@ -600,6 +653,13 @@ export default function Admin() {
     // --- GUARDAR CALIDAD ---
     sharpness: clampPercent(sharpness, 0),
     overlayOpacity: clampPercent(overlayOpacity, 0),
+    matchPoolSize: Number(matchPoolSize) || 5,
+    minUseOnce: Boolean(minUseOnce),
+    maxUsesPerPhoto: limitUsesEnabled
+      ? Number.isFinite(Number(maxUsesPerPhoto)) && Number(maxUsesPerPhoto) > 0
+        ? Math.floor(Number(maxUsesPerPhoto))
+        : null
+      : null,
   });
 
   const handleUploadMainImage = async (event) => {
@@ -808,6 +868,17 @@ export default function Admin() {
               onSharpnessChange={setSharpness}
               overlayOpacity={overlayOpacity}
               onOverlayOpacityChange={setOverlayOpacity}
+              matchPoolSize={matchPoolSize}
+              onMatchPoolSizeChange={setMatchPoolSize}
+              minUseOnce={minUseOnce}
+              onMinUseOnceChange={setMinUseOnce}
+              maxUsesPerPhoto={maxUsesPerPhoto}
+              onMaxUsesPerPhotoChange={setMaxUsesPerPhoto}
+              limitUsesEnabled={limitUsesEnabled}
+              onLimitUsesEnabledChange={(enabled) => {
+                setLimitUsesEnabled(enabled);
+                if (!enabled) setMaxUsesPerPhoto(null);
+              }}
             />
           )}
           {activeSection === "fotos" && (
@@ -834,6 +905,8 @@ export default function Admin() {
               loadingAllPhotos={loadingAllPhotos}
               photos={photos}
               onPhotoOwnerClick={handlePhotoOwnerClick}
+              usablePhotosCount={usablePhotosCount}
+              loadingUsablePhotos={loadingUsablePhotos}
             />
           )}
           {activeSection === "estadisticas" && (

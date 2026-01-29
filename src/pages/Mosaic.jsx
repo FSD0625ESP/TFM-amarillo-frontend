@@ -52,11 +52,26 @@ export default function Mosaic() {
       setIsLoading(true);
       setError(null);
       try {
+        const configRes = await fetch(`${API_URL}/mosaic/config`);
+        let config = null;
+        let activeKey = "default";
+        if (configRes.ok) {
+          config = await configRes.json();
+          if (config?.mosaicKey) {
+            activeKey = config.mosaicKey;
+          }
+        }
+
         // Ejecutamos en paralelo para máxima velocidad
-        const [tilesRes, snapshotRes, configRes] = await Promise.all([
-          fetch(`${API_URL}/mosaic/tiles?mosaicKey=default`),
-          fetch(`${API_URL}/mosaic/snapshots/latest?mosaicKey=default`),
-          fetch(`${API_URL}/mosaic/config`),
+        const [tilesRes, snapshotRes] = await Promise.all([
+          fetch(
+            `${API_URL}/mosaic/tiles?mosaicKey=${encodeURIComponent(activeKey)}`
+          ),
+          fetch(
+            `${API_URL}/mosaic/snapshots/latest?mosaicKey=${encodeURIComponent(
+              activeKey
+            )}`
+          ),
         ]);
 
         // Procesar Coordenadas (Esencial para el click)
@@ -87,11 +102,8 @@ export default function Mosaic() {
         }
 
         // B) Fallback a Imagen Principal (Si no se ha generado snapshot aún)
-        if (!finalUrl && configRes.ok) {
-          const conf = await configRes.json();
-          if (conf && conf.mainImageUrl) {
-            finalUrl = conf.mainImageUrl;
-          }
+        if (!finalUrl && config?.mainImageUrl) {
+          finalUrl = config.mainImageUrl;
         }
 
         if (isMounted) {
