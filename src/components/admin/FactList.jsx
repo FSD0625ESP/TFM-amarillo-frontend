@@ -2,6 +2,18 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const FALLBACK_API_URL = "http://localhost:3000";
+const shouldFallback = (error) => !error?.response;
+const withFallback = async (primary, fallback) => {
+  try {
+    return await primary();
+  } catch (error) {
+    if (!shouldFallback(error) || API_URL === FALLBACK_API_URL) {
+      throw error;
+    }
+    return fallback();
+  }
+};
 
 const FactList = () => {
   const [facts, setFacts] = useState([]);
@@ -16,7 +28,10 @@ const FactList = () => {
   useEffect(() => {
     const fetchFacts = async () => {
       try {
-        const res = await axios.get(`${API_URL}/facts`);
+        const res = await withFallback(
+          () => axios.get(`${API_URL}/facts`),
+          () => axios.get(`${FALLBACK_API_URL}/facts`)
+        );
         console.log("🚀 Facts desde backend:", res.data);
         setFacts(res.data.facts);
       } catch (error) {
@@ -29,7 +44,10 @@ const FactList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_URL}/facts/${id}`);
+      await withFallback(
+        () => axios.delete(`${API_URL}/facts/${id}`),
+        () => axios.delete(`${FALLBACK_API_URL}/facts/${id}`)
+      );
       setFacts((prev) => prev.filter((fact) => fact._id !== id));
     } catch (error) {
       console.error("Error al eliminar el fact:", error);
@@ -147,9 +165,15 @@ const FactList = () => {
                 onClick={async () => {
                   try {
                     if (editFactId) {
-                      const res = await axios.put(
-                        `${API_URL}/facts/${editFactId}`,
-                        { text: editFactText }
+                      const res = await withFallback(
+                        () =>
+                          axios.put(`${API_URL}/facts/${editFactId}`, {
+                            text: editFactText,
+                          }),
+                        () =>
+                          axios.put(`${FALLBACK_API_URL}/facts/${editFactId}`, {
+                            text: editFactText,
+                          })
                       );
                       setFacts((prev) =>
                         prev.map((f) =>
@@ -157,9 +181,12 @@ const FactList = () => {
                         )
                       );
                     } else {
-                      const res = await axios.post(
-                        `${API_URL}/facts`,
-                        { text: newFactText }
+                      const res = await withFallback(
+                        () => axios.post(`${API_URL}/facts`, { text: newFactText }),
+                        () =>
+                          axios.post(`${FALLBACK_API_URL}/facts`, {
+                            text: newFactText,
+                          })
                       );
                       setFacts((prev) => [res.data.fact, ...prev]);
                       setCurrentPage(1);
