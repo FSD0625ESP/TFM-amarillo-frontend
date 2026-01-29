@@ -280,7 +280,7 @@ export default function Mosaic() {
       <header className="mosaic-header">
         <h1 className="mosaic-title">Mosaico Colaborativo</h1>
         <p className="mosaic-subtitle">
-          Explora el mural global en alta definición. Haz click para ver las fotos originales.
+          Explora el mural en alta definición. Click para ver fotos originales.
         </p>
       </header>
 
@@ -291,9 +291,9 @@ export default function Mosaic() {
             <button className="mosaic-btn" onClick={() => zoomTo(scale * 1.25)} aria-label="Acercar" title="Zoom In">+</button>
             <button className="mosaic-btn" onClick={() => zoomTo(scale * 0.8)} aria-label="Alejar" title="Zoom Out">−</button>
             <span className="mosaic-zoom">{Math.round(scale * 100)}%</span>
-            <button className="mosaic-btn" onClick={handleReset} title="Centrar">Reset</button>
-            <button className="mosaic-btn" onClick={handleToggleFullscreen} title="Pantalla Completa">
-              {isFullscreen ? "Salir" : "Full"}
+            <button className="mosaic-btn mosaic-btn-text" onClick={handleReset} title="Centrar">Centrar</button>
+            <button className="mosaic-btn mosaic-btn-text" onClick={handleToggleFullscreen} title="Pantalla Completa">
+              {isFullscreen ? "Salir" : "Pantalla"}
             </button>
           </div>
 

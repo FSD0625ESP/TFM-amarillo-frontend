@@ -10,26 +10,34 @@
   overflow: hidden; /* Evita scroll en la página entera */
 }
 
-.mosaic-header {
+.mosaic-page .mosaic-header {
   flex: 0 0 auto;
-  padding: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 2rem);
   text-align: center;
-  background-color: var(--header-bg, #fff);
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: linear-gradient(
+    180deg,
+    rgba(214, 164, 97, 0.18),
+    rgba(255, 255, 255, 0.92)
+  );
+  border-bottom: 1px solid rgba(214, 164, 97, 0.35);
   z-index: 10;
 }
 
-.mosaic-title {
+.mosaic-page .mosaic-title {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fbbf24; /* Amarillo corporativo */
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-.mosaic-subtitle {
-  margin: 0.5rem 0 0;
-  font-size: 0.9rem;
-  opacity: 0.8;
+.mosaic-page .mosaic-subtitle {
+  margin: 0.4rem auto 0;
+  font-size: 0.92rem;
+  max-width: 58ch;
+  color: var(--text);
+  opacity: 0.85;
 }
 
 /* --- Contenedor del Visor --- */
@@ -69,9 +77,9 @@
   background-color: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 4px;
-  width: 40px;
+  width: 72px;
   height: 40px;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   color: #333;
@@ -84,6 +92,13 @@
 .mosaic-btn:hover {
   background-color: #fbbf24;
   transform: scale(1.05);
+}
+
+.mosaic-btn-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1;
 }
 
 .mosaic-zoom {
@@ -225,4 +240,3 @@
     display: none; /* Ocultar ayuda en móvil para limpiar pantalla */
   }
 }
-

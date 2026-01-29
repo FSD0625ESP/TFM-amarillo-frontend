@@ -74,14 +74,14 @@
   margin-bottom: 0.75rem;
 }
 
-.mosaic-header {
+.admin-layout .mosaic-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.mosaic-header h2 {
+.admin-layout .mosaic-header h2 {
   font-size: 1.15rem;
   font-weight: 700;
   color: #111827;
@@ -89,7 +89,7 @@
   text-align: left;
 }
 
-.mosaic-subtitle {
+.admin-layout .mosaic-subtitle {
   color: #6b7280;
   font-size: 0.9rem;
 }
