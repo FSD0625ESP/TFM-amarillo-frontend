@@ -8,7 +8,7 @@ import {
   getPhotos,
   likePhoto,
 } from "../services/photoService";
-import "./Gallery.css"; 
+import "./Gallery.css";
 
 export default function Gallery() {
   const [photos, setPhotos] = useState([]);
@@ -110,15 +110,11 @@ export default function Gallery() {
       if (typeof updatedLikes === "number") {
         setPhotos((prev) =>
           prev.map((photo) =>
-            photo._id === photoId
-              ? { ...photo, likes: updatedLikes }
-              : photo
+            photo._id === photoId ? { ...photo, likes: updatedLikes } : photo
           )
         );
         setSelectedPhoto((prev) =>
-          prev && prev._id === photoId
-            ? { ...prev, likes: updatedLikes }
-            : prev
+          prev && prev._id === photoId ? { ...prev, likes: updatedLikes } : prev
         );
       }
     } catch (error) {
@@ -159,7 +155,7 @@ export default function Gallery() {
             selected={filters.country}
             countries={countries}
             onSelect={(code) => setFilters({ ...filters, country: code })}
-            placeholder="Todos los países 🌍"
+            placeholder="Todos los países"
             disabled={loadingCountries}
           />
         </div>
@@ -179,7 +175,7 @@ export default function Gallery() {
           value={filters.year}
           disabled={loadingYears}
         >
-          <option value="">Todos los años 📅</option>
+          <option value="">Todos los años</option>
           {years.map((year) => (
             <option key={year} value={year}>
               {year}
@@ -204,7 +200,7 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* 📸 GRID DE FOTOS */}
+      {/* GRID DE FOTOS */}
       {likeNotice ? (
         <div className="gallery-notice" role="status">
           <span className="notice-icon" aria-hidden="true">
@@ -241,12 +237,12 @@ export default function Gallery() {
                   </p>
                   <div className="photo-footer">
                     <div className="meta-tags">
-                    {photo.country && (
-                      <span className="tag-country">
-                        📍 {formatCountry(photo.country) || photo.country}
-                      </span>
-                    )}
-                      <span className="tag-year">📅 {photo.year || "N/A"}</span>
+                      {photo.country && (
+                        <span className="tag-country">
+                          {formatCountry(photo.country) || photo.country}
+                        </span>
+                      )}
+                      <span className="tag-year">{photo.year || "N/A"}</span>
                     </div>
                     <div className="likes-section">
                       <button
@@ -330,7 +326,9 @@ export default function Gallery() {
             />
             <div className="photo-modal-info">
               <h3>{selectedPhoto.title}</h3>
-              <p>{selectedPhoto.description || selectedPhoto.owner?.story || ""}</p>
+              <p>
+                {selectedPhoto.description || selectedPhoto.owner?.story || ""}
+              </p>
               {likeNotice ? (
                 <div className="gallery-notice modal" role="status">
                   <span className="notice-icon" aria-hidden="true">

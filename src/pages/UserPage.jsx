@@ -27,109 +27,101 @@ function UserPage() {
   const [year, setYear] = useState("");
   const [files, setFiles] = useState([]);
 
-useEffect(() => {
-  const token = localStorage.getItem("userToken");
+  useEffect(() => {
+    const token = localStorage.getItem("userToken");
 
-if (!token) {
-  setError("Sesión inválida o expirada");
-  return;
-}
+    if (!token) {
+      setError("Sesión inválida o expirada");
+      return;
+    }
 
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
 
-  const headers = {
-  Authorization: `Bearer ${token}`,
-};
+    const load = async () => {
+      const userRes = await axios.get(`${API_URL}/emails/me`, { headers });
 
+      setName(userRes.data.name);
+      setEmail(userRes.data.email);
 
-  const load = async () => {
-    const userRes = await axios.get(
-      `${API_URL}/emails/me`,
-      { headers }
-    );
+      const photosRes = await axios.get(`${API_URL}/emails/me/photos`, {
+        headers,
+      });
 
-    setName(userRes.data.name);
-    setEmail(userRes.data.email);
+      setPhotos(photosRes.data.photos);
+    };
 
-    const photosRes = await axios.get(
-      `${API_URL}/emails/me/photos`,
-      { headers }
-    );
-
-    setPhotos(photosRes.data.photos);
-  };
-
-  load();
-}, []);
-
-
-
+    load();
+  }, []);
 
   // 📤 SUBIR FOTO NUEVA
   const handleAddPhoto = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const data = new FormData();
-    data.append("email", email); 
-    data.append("title", title);
-    data.append("description", description);
-    data.append("year", year);
+    try {
+      const data = new FormData();
+      data.append("email", email);
+      data.append("title", title);
+      data.append("description", description);
+      data.append("year", year);
 
-    files.forEach((file) => data.append("photos", file));
+      files.forEach((file) => data.append("photos", file));
 
-   const token = localStorage.getItem("userToken");
+      const token = localStorage.getItem("userToken");
 
-await axios.post(
-  `${API_URL}/emails/add-photos`,
-  data,
-  {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+      await axios.post(`${API_URL}/emails/add-photos`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      // limpiar
+      setModalOpen(false);
+      setTitle("");
+      setDescription("");
+      setYear("");
+      setFiles([]);
 
-    // limpiar
-    setModalOpen(false);
-    setTitle("");
-    setDescription("");
-    setYear("");
-    setFiles([]);
-
-    // recargar fotos
-    const res = await axios.get(
-  `${API_URL}/emails/me/photos`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-    setPhotos(res.data.photos);
-  } catch (err) {
-    console.error(err);
-    alert("Error subiendo la foto");
-  }
-};
-
+      // recargar fotos
+      const res = await axios.get(`${API_URL}/emails/me/photos`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setPhotos(res.data.photos);
+    } catch (err) {
+      console.error(err);
+      alert("Error subiendo la foto");
+    }
+  };
 
   if (error) return <p>{error}</p>;
 
   return (
     <div className="user-page">
-      <h2>📸 Tus fotos</h2>
+      <h2>Bienvenid@ otra vez {name}</h2>
 
       <div className="user-meta">
-        <p><strong>Bienvenido de vuelta, {name}</strong></p>
+        <p>
+          <strong>
+            {" "}
+            Aquí puedes ver todas las fotos que has compartido en el mural
+            colaborativo de La Sagrada Familia{" "}
+          </strong>
+        </p>
         <p>{email}</p>
       </div>
 
       <div className="user-actions">
         <button onClick={() => (window.location.href = "/")}>Home</button>
-        <button onClick={() => (window.location.href = "/gallery")}>Galería</button>
-        <button onClick={() => (window.location.href = "/mosaic")}>Mosaico</button>
+        <button onClick={() => (window.location.href = "/gallery")}>
+          Galería
+        </button>
+        <button onClick={() => (window.location.href = "/mosaic")}>
+          Mosaico
+        </button>
         <button onClick={() => setModalOpen(true)}> Agregar foto</button>
       </div>
 
@@ -147,63 +139,63 @@ await axios.post(
       </div>
 
       <Modal
-  isOpen={modalOpen}
-  onRequestClose={() => setModalOpen(false)}
-  className="modal-content"
-  overlayClassName="modal-overlay"
->
-  <h2> Añadir nueva foto</h2>
+        isOpen={modalOpen}
+        onRequestClose={() => setModalOpen(false)}
+        className="modal-content"
+        overlayClassName="modal-overlay"
+      >
+        <h2> Añadir nueva foto</h2>
 
-  <form onSubmit={handleAddPhoto}>
-    {/* TÍTULO */}
-    <input
-      type="text"
-      placeholder="Título de la foto"
-      value={title}
-      onChange={(e) => setTitle(e.target.value)}
-      required
-    />
+        <form onSubmit={handleAddPhoto}>
+          {/* TÍTULO */}
+          <input
+            type="text"
+            placeholder="Título de la foto"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
 
-    {/* DESCRIPCIÓN */}
-    <textarea
-      placeholder="Descripción"
-      value={description}
-      onChange={(e) => setDescription(e.target.value)}
-      required
-    />
+          {/* DESCRIPCIÓN */}
+          <textarea
+            placeholder="Descripción"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
 
-    {/* AÑO (MISMA LÓGICA QUE REGISTRO) */}
-    <select
-      value={year}
-      onChange={(e) => setYear(e.target.value)}
-      required
-    >
-      <option value="" disabled>
-        Año de la foto (desde 1882)
-      </option>
-      {YEAR_OPTIONS.map((y) => (
-        <option key={y} value={y}>
-          {y}
-        </option>
-      ))}
-    </select>
+          {/* AÑO (MISMA LÓGICA QUE REGISTRO) */}
+          <select
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Año de la foto (desde 1882)
+            </option>
+            {YEAR_OPTIONS.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
 
-    {/* FOTO */}
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => setFiles([...e.target.files])}
-      required
-    />
+          {/* FOTO */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFiles([...e.target.files])}
+            required
+          />
 
-    <div className="modal-buttons">
-      <button type="submit">Subir foto</button>
-      <button type="button" onClick={() => setModalOpen(false)}>
-        Cancelar
-      </button>
-    </div>
-  </form>
-</Modal>  
+          <div className="modal-buttons">
+            <button type="submit">Subir foto</button>
+            <button type="button" onClick={() => setModalOpen(false)}>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
