@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 20,
+            "activePatchIndex": 23,
             "patches": [
                 {
                     "date": 1765474858499,
@@ -88,6 +88,18 @@
                 {
                     "date": 1769460171376,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -158,11 +158,14 @@\n           <div className=\"intro-cta\">\n             <Link to=\"/email\" className=\"btn btn-primary\">\n               Colabora con tu foto\n             </Link>\n-            <Link to=\"/mosaic\" className=\"btn-link\">\n+            <Link to=\"/mosaic\" className=\"btn btn-primary\">\n               Ver el mosaico\n             </Link>\n+            <Link to=\"/gallery\" className=\"btn btn-primary\">\n+              Ver la galería\n+            </Link>\n           </div>\n         </div>\n       </section>\n \n@@ -176,9 +179,9 @@\n           />\n         </Link>\n       </section>\n \n-      <MosaicProgressBar />\n+      <MosaicProgressBar totalPhotos={stats.fotos} />\n \n       <section className=\"stats-section\">\n         <h3 className=\"stats-title\">Nuestra comunidad en cifras</h3>\n         {statsError && (\n@@ -302,10 +305,9 @@\n               background: \"none\",\n               border: \"none\",\n               padding: 0,\n               cursor: \"pointer\",\n-              color: \"inherit\",\n-              textDecoration: \"underline\",\n+              color: \"white\",\n             }}\n             aria-label=\"Abrir información sobre el proyecto\"\n           >\n             Sobre el proyecto\n"
+                },
+                {
+                    "date": 1769707644980,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -216,8 +216,10 @@\n           </div>\n         </div>\n       </section>\n \n+    \n+\n       <section className=\"carousel-section\">\n         <h2 className=\"section-title\">Destacados del mosaico</h2>\n \n         {!highlighted ? (\n"
+                },
+                {
+                    "date": 1769707907139,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -214,9 +214,9 @@\n         </div>\n       </section>\n \n       <section className=\"carousel-section\">\n-        <h2 className=\"section-title\">Destacados del mosaico</h2>\n+        <h2 className=\"section-title\">Fotos destacadas del mosaico</h2>\n \n         {!highlighted ? (\n           <p>Cargando...</p>\n         ) : (\n"
+                },
+                {
+                    "date": 1769707967624,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -214,9 +214,9 @@\n         </div>\n       </section>\n \n       <section className=\"carousel-section\">\n-        <h2 className=\"section-title\">Fotos destacadas del mosaico</h2>\n+        <h2 className=\"section-title\">Mira las fotos más destacadas del mosaico</h2>\n \n         {!highlighted ? (\n           <p>Cargando...</p>\n         ) : (\n"
                 }
             ],
             "date": 1765474858499,

@@ -1,56 +1,49 @@
 .fact-section {
   width: 100%;
-  background-color: rgba(245, 237, 220, 0.65);
-  border-bottom: 1px solid rgba(214, 164, 97, 0.45);
-  padding: 0.6rem 0.75rem;
   text-align: center;
+  .fact-section {
+    width: 100%; /* ancho menor para no llegar a los extremos */
+    border-bottom: 1px solid rgba(214, 164, 97, 0.45);
+    margin: 0 auto; /* centra horizontalmente */
+    text-align: center;
+    font-size: 0.8rem;
+    white-space: nowrap; /* Prevents text from wrapping to the next line */
+    text-overflow: ellipsis;
+    background: linear-gradient(to bottom, var(--bg), var(--bg-alt));
+    color: var(--text);
+    font-family: "Poppins", sans-serif;
+    transition: background-color 0.3s ease;
+  }
+
+  .fact-section::after {
+    content: "";
+    display: block;
+    height: 1px; /* grosor de la línea */
+    background-color: rgba(214, 164, 97, 0.8); /* dorado sutil */
+    margin: 6px auto 0; /* separación arriba y centrado */
+    border-radius: 1px; /* bordes redondeados */
+  }
+
+  background: linear-gradient(to bottom, var(--bg), var(--bg-alt));
   color: var(--text);
   font-family: "Poppins", sans-serif;
-  transition: background-color 0.3s ease;
-}
-
-[data-theme="sunset"] .fact-section {
-  background-color: rgba(75, 54, 33, 0.85);
-  color: #f4e6c1;
+  transition: background 0.6s ease, color 0.6s ease;
+  text-align: center;
 }
 
 .fact-inner {
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
-.fact-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text);
+/* Tema sunset */
+[data-theme="sunset"] .fact-section {
+  background: linear-gradient(to bottom, var(--bg), var(--bg-alt));
 }
 
-.fact-text {
-  margin: 0.25rem 0 0;
-  font-size: 0.95rem;
-  font-style: italic;
-  line-height: 1.35;
-}
-
-.fact-loading {
-  margin: 0.25rem 0 0;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-/* Fade-in animation for fact changes */
-.animate-fade-in {
-  opacity: 0;
-  animation: fadeIn 1s ease-in-out forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+/* Responsive */
+@media (max-width: 400px) {
+  .fact-section {
+    padding: 1.5rem 0.75rem;
   }
 }

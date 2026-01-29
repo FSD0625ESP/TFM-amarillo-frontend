@@ -33,7 +33,6 @@ export default function FactSection() {
   return (
     <section className="fact-section" aria-live="polite" aria-atomic="true">
       <div className="fact-inner">
-        <h3 className="fact-title">Dato curioso</h3>
         {fact && (
           <p key={fact?._id || "default"} className="fact-text animate-fade-in">
             “{fact?.text || fact || "No hay datos."}”

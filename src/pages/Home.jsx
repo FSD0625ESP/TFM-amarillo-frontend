@@ -17,17 +17,16 @@ export default function Home() {
   const navigate = useNavigate();
   const token = localStorage.getItem("userToken");
 
- const goToUserPage = () => {
-  const token = localStorage.getItem("userToken");
+  const goToUserPage = () => {
+    const token = localStorage.getItem("userToken");
 
-  if (!token || token === "null" || token === "undefined") {
-    navigate("/email"); // placeholder
-    return;
-  }
+    if (!token || token === "null" || token === "undefined") {
+      navigate("/email"); // placeholder
+      return;
+    }
 
-  navigate("/userPage");
-};
-
+    navigate("/userPage");
+  };
 
   const {
     total: onlineTotal = 0,
@@ -97,7 +96,7 @@ export default function Home() {
 
     fetchHighlighted();
   }, []);
-  
+
   // Autoplay SIN hash, SIN scroll //
   useEffect(() => {
     if (!highlighted || slideCount === 0) return;
@@ -111,11 +110,9 @@ export default function Home() {
 
   return (
     <main className="home">
-      <button onClick={goToUserPage}
-       className="user-page-link"
-      >
-  Mis Fotos
-</button>
+      <button onClick={goToUserPage} className="user-page-link">
+        Mis Fotos
+      </button>
 
       <button
         className="theme-toggle"
@@ -141,7 +138,7 @@ export default function Home() {
       <section className="intro-section" aria-labelledby="intro-title">
         <div className="intro-inner">
           <h2 id="intro-title" className="intro-title">
-            Un homenaje colaborativo a la Sagrada Família
+            Mosaico colaborativo en homenaje a la Sagrada Família
           </h2>
 
           <p className="intro-text">
@@ -159,9 +156,9 @@ export default function Home() {
 
           <div className="intro-cta">
             {(!token || token === "null" || token === "undefined") && (
-            <Link to="/email" className="btn btn-primary">
-              Colabora con tu foto
-            </Link>
+              <Link to="/email" className="btn btn-primary">
+                Colabora con tu foto
+              </Link>
             )}
             <Link to="/mosaic" className="btn btn-primary">
               Ver el mosaico
@@ -218,7 +215,9 @@ export default function Home() {
       </section>
 
       <section className="carousel-section">
-        <h2 className="section-title">Destacados del mosaico</h2>
+        <h3 className="section-title">
+          Mira las fotos más destacadas del mosaico
+        </h3>
 
         {!highlighted ? (
           <p>Cargando...</p>
