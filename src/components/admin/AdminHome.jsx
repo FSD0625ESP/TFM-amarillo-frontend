@@ -48,7 +48,19 @@ export default function AdminHome({
   onRefreshSnapshots,
   onOpenSnapshot,
   onRequestDeleteSnapshot,
+  // Nuevos props para calidad visual
+  sharpness,
+  onSharpnessChange,
+  overlayOpacity,
+  onOverlayOpacityChange,
 }) {
+  const safeSharpness = Number.isFinite(Number(sharpness))
+    ? Number(sharpness)
+    : 0;
+  const safeOverlayOpacity = Number.isFinite(Number(overlayOpacity))
+    ? Number(overlayOpacity)
+    : 0;
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Bienvenido, {adminName}</h1>
@@ -121,6 +133,7 @@ export default function AdminHome({
           )}
         </div>
 
+        {/* Grid de Configuración Numérica */}
         <div className="mosaic-grid">
           <label>
             <span
@@ -172,9 +185,9 @@ export default function AdminHome({
           <label>
             <span
               className="mosaic-tooltip"
-              data-tooltip="Ancho final de la imagen del mosaico."
+              data-tooltip="Ancho final de la imagen del mosaico. Recomendado: 4000px o 5000px."
             >
-              Ancho (px)
+              Ancho Final (px)
             </span>
             <input
               type="number"
@@ -194,7 +207,7 @@ export default function AdminHome({
                   : "Alto final de la imagen del mosaico."
               }
             >
-              Alto (px)
+              Alto Final (px)
             </span>
             <input
               type="number"
@@ -206,6 +219,67 @@ export default function AdminHome({
               disabled={useAutoRatio}
             />
           </label>
+        </div>
+
+        {/* NUEVA SECCIÓN: Ajustes de Calidad Visual */}
+        <div className="p-4 bg-base-200 rounded-lg mt-4 mb-4">
+          <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+            Calidad Visual y Mezcla
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Control de Nitidez */}
+            <div className="form-control w-full">
+              <label className="label cursor-pointer justify-start gap-2">
+                <span className="label-text font-semibold">Nitidez (Sharpness)</span>
+                <span className="badge badge-sm badge-neutral">
+                  {safeSharpness}%
+                </span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="10"
+                value={safeSharpness}
+                onChange={(e) =>
+                  onSharpnessChange?.(Number(e.target.value))
+                }
+                className="range range-xs range-primary"
+              />
+              <label className="label">
+                <span className="label-text-alt text-gray-500">
+                  Aumenta la definición de bordes en las fotos pequeñas (0-100).
+                </span>
+              </label>
+            </div>
+
+            {/* Control de Overlay */}
+            <div className="form-control w-full">
+              <label className="label cursor-pointer justify-start gap-2">
+                <span className="label-text font-semibold">Opacidad del Overlay</span>
+                <span className="badge badge-sm badge-neutral">
+                  {safeOverlayOpacity}%
+                </span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={safeOverlayOpacity}
+                onChange={(e) =>
+                  onOverlayOpacityChange?.(Number(e.target.value))
+                }
+                className="range range-xs range-secondary"
+              />
+              <label className="label">
+                <span className="label-text-alt text-gray-500">
+                  Mezcla la foto original sobre el mosaico. Rec: 20-30%.
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="mosaic-actions">

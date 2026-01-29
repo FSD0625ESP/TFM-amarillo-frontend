@@ -40,9 +40,11 @@ export default function Admin() {
   const [editingCountry, setEditingCountry] = useState(false);
   const [countryDraft, setCountryDraft] = useState("");
   const [savingCountry, setSavingCountry] = useState(false);
+  
+  // --- Estados del Mosaico ---
   const [mosaicKey, setMosaicKey] = useState("default");
-  const [mosaicWidth, setMosaicWidth] = useState(2000);
-  const [mosaicHeight, setMosaicHeight] = useState(2000);
+  const [mosaicWidth, setMosaicWidth] = useState(4000); // Subido por defecto a 4000
+  const [mosaicHeight, setMosaicHeight] = useState(4000);
   const [useAutoRatio, setUseAutoRatio] = useState(false);
   const [mainImageAspect, setMainImageAspect] = useState(null);
   const [mosaicBusy, setMosaicBusy] = useState(false);
@@ -68,6 +70,10 @@ export default function Admin() {
   const [intervalHours, setIntervalHours] = useState(24);
   const [refreshSeconds, setRefreshSeconds] = useState(30);
   const [concurrency, setConcurrency] = useState(3);
+  
+  // --- NUEVOS ESTADOS DE CALIDAD ---
+  const [sharpness, setSharpness] = useState(0);       // Nitidez
+  const [overlayOpacity, setOverlayOpacity] = useState(20); // Mezcla
 
   const handleSaveCountry = async () => {
     if (!selectedUser?.id || !countryDraft) return;
@@ -213,6 +219,12 @@ export default function Admin() {
         ? Math.max(1, Math.round(safeWidth * mainImageAspect))
         : safeHeight;
     return { width: safeWidth, height: autoHeight, baseHeight: safeHeight };
+  };
+
+  const clampPercent = (value, fallback = 0) => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(100, Math.max(0, parsed));
   };
 
   const handleViewPhotos = (userPayload) => {
@@ -451,6 +463,8 @@ export default function Admin() {
         mosaicKey: mosaicKey.trim(),
         allowReuse,
         reuseAfterExhaustion,
+        sharpness: clampPercent(sharpness, 0),
+        overlayOpacity: clampPercent(overlayOpacity, 0),
       });
       const { data } = await axios.post(`${API_URL}/mosaic/render`, {
         mosaicKey: mosaicKey.trim(),
@@ -459,6 +473,8 @@ export default function Admin() {
         folder: "Mosaic",
         format: "jpg",
         concurrency: Number(concurrency) || 3,
+        sharpness: clampPercent(sharpness, 0),
+        overlayOpacity: clampPercent(overlayOpacity, 0),
       });
       setMosaicSnapshot(data?.snapshot || null);
       fetchMosaicSnapshots();
@@ -513,6 +529,15 @@ export default function Admin() {
       if (typeof data.reuseAfterExhaustion === "boolean") {
         setReuseAfterExhaustion(data.reuseAfterExhaustion);
       }
+      
+      // --- CARGAR CALIDAD ---
+      if (data.sharpness !== undefined && data.sharpness !== null) {
+        setSharpness(clampPercent(data.sharpness, 0));
+      }
+      if (data.overlayOpacity !== undefined && data.overlayOpacity !== null) {
+        setOverlayOpacity(clampPercent(data.overlayOpacity, 0));
+      }
+      
       setConfigLoaded(true);
     } catch (err) {
       console.error("Error cargando config de mosaico:", err);
@@ -533,6 +558,8 @@ export default function Admin() {
         tileHeight: Number(tileHeight) || 20,
         mosaicKey: mosaicKey.trim() || "default",
         overwrite: true,
+        sharpness: clampPercent(sharpness, 0),
+        overlayOpacity: clampPercent(overlayOpacity, 0),
       });
       const tilesCheck = await axios.get(
         `${API_URL}/mosaic/tiles?mosaicKey=${encodeURIComponent(
@@ -552,6 +579,29 @@ export default function Admin() {
     }
   };
 
+  // Función auxiliar para construir el objeto de configuración
+  const getConfigPayload = (width, height, nextEnabled) => ({
+    enabled: nextEnabled !== undefined ? nextEnabled : autoEnabled,
+    mainImageUrl,
+    tileWidth: Number(tileWidth) || 20,
+    tileHeight: Number(tileHeight) || 20,
+    mosaicKey: mosaicKey.trim() || "default",
+    mosaicWidth: width,
+    mosaicHeight: height,
+    mosaicSize: width, // Guardamos el ancho como size principal
+    useAutoRatio,
+    allowReuse,
+    reuseAfterExhaustion,
+    intervalHours: Number(intervalHours) || 24,
+    refreshSeconds: Number.isFinite(Number(refreshSeconds))
+      ? Number(refreshSeconds)
+      : 30,
+    concurrency: Number(concurrency) || 3,
+    // --- GUARDAR CALIDAD ---
+    sharpness: clampPercent(sharpness, 0),
+    overlayOpacity: clampPercent(overlayOpacity, 0),
+  });
+
   const handleUploadMainImage = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -568,24 +618,11 @@ export default function Admin() {
       setMainImageUrl(nextUrl);
       if (autoEnabled) {
         const { width, height } = resolveMosaicDimensions();
-        await axios.put(`${API_URL}/mosaic/config`, {
-          enabled: true,
-          mainImageUrl: nextUrl,
-          tileWidth: Number(tileWidth) || 20,
-          tileHeight: Number(tileHeight) || 20,
-          mosaicKey: mosaicKey.trim() || "default",
-          mosaicWidth: width,
-          mosaicHeight: height,
-          mosaicSize: width,
-          useAutoRatio,
-          allowReuse,
-          reuseAfterExhaustion,
-          intervalHours: Number(intervalHours) || 24,
-          refreshSeconds: Number.isFinite(Number(refreshSeconds))
-            ? Number(refreshSeconds)
-            : 30,
-          concurrency: Number(concurrency) || 3,
-        });
+        // Usamos payload unificado
+        const payload = getConfigPayload(width, height, true);
+        payload.mainImageUrl = nextUrl; // Asegurar que va la nueva URL
+        
+        await axios.put(`${API_URL}/mosaic/config`, payload);
       }
     } catch (err) {
       console.error("Error subiendo imagen principal:", err);
@@ -613,24 +650,9 @@ export default function Admin() {
         );
         return;
       }
-      const { data } = await axios.put(`${API_URL}/mosaic/config`, {
-        enabled: nextEnabled,
-        mainImageUrl,
-        tileWidth: Number(tileWidth) || 20,
-        tileHeight: Number(tileHeight) || 20,
-        mosaicKey: mosaicKey.trim() || "default",
-        mosaicWidth: width,
-        mosaicHeight: height,
-        mosaicSize: width,
-        useAutoRatio,
-        allowReuse,
-        reuseAfterExhaustion,
-        intervalHours: Number(intervalHours) || 24,
-        refreshSeconds: Number.isFinite(Number(refreshSeconds))
-          ? Number(refreshSeconds)
-          : 30,
-        concurrency: Number(concurrency) || 3,
-      });
+      const payload = getConfigPayload(width, height, nextEnabled);
+      const { data } = await axios.put(`${API_URL}/mosaic/config`, payload);
+      
       setAutoEnabled(Boolean(data?.enabled));
       setConfigLoaded(true);
     } catch (err) {
@@ -659,24 +681,9 @@ export default function Admin() {
         );
         return;
       }
-      const { data } = await axios.put(`${API_URL}/mosaic/config`, {
-        enabled: autoEnabled,
-        mainImageUrl,
-        tileWidth: Number(tileWidth) || 20,
-        tileHeight: Number(tileHeight) || 20,
-        mosaicKey: mosaicKey.trim() || "default",
-        mosaicWidth: width,
-        mosaicHeight: height,
-        mosaicSize: width,
-        useAutoRatio,
-        allowReuse,
-        reuseAfterExhaustion,
-        intervalHours: Number(intervalHours) || 24,
-        refreshSeconds: Number.isFinite(Number(refreshSeconds))
-          ? Number(refreshSeconds)
-          : 30,
-        concurrency: Number(concurrency) || 3,
-      });
+      const payload = getConfigPayload(width, height); // usa estado actual de autoEnabled
+      const { data } = await axios.put(`${API_URL}/mosaic/config`, payload);
+      
       setAutoEnabled(Boolean(data?.enabled));
       setConfigLoaded(true);
     } catch (err) {
@@ -795,6 +802,12 @@ export default function Admin() {
               onRefreshSnapshots={fetchMosaicSnapshots}
               onOpenSnapshot={handleOpenSnapshot}
               onRequestDeleteSnapshot={setSnapshotToDelete}
+              
+              // --- PASAMOS LOS PROPS DE CALIDAD ---
+              sharpness={sharpness}
+              onSharpnessChange={setSharpness}
+              overlayOpacity={overlayOpacity}
+              onOverlayOpacityChange={setOverlayOpacity}
             />
           )}
           {activeSection === "fotos" && (
@@ -843,8 +856,6 @@ export default function Admin() {
             </div>
           )}
         </div>
-
-        {/* La sección de fotos se muestra solo cuando se navega a "Fotos" desde el menú lateral */}
       </div>
 
       <AdminSidebar
