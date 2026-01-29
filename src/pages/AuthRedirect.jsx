@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function AuthRedirect() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ export default function AuthRedirect() {
 
       try {
         const res = await axios.get(
-          `http://localhost:3000/emails/verify-token?token=${magicToken}`
+          `${API_URL}/emails/verify-token?token=${magicToken}`
         );
 
         // 🔐 GUARDAR SESIÓN REAL

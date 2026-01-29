@@ -16,6 +16,8 @@ import {
   WhatsappIcon,
 } from "react-share";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const shareUrl = "https://tusitiooficial.com";
 const title = "¡Acabo de subir mi foto al Proyecto Amarillo 💛!";
 const START_YEAR = 1882;
@@ -96,7 +98,7 @@ function UserRegistration() {
     const verifyToken = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/emails/verify-token?token=${token}`
+          `${API_URL}/emails/verify-token?token=${token}`
         );
 
         localStorage.setItem("userToken", res.data.token);
@@ -153,7 +155,7 @@ function UserRegistration() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/emails/complete",
+        `${API_URL}/emails/complete`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

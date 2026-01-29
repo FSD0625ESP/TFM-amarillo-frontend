@@ -4,6 +4,8 @@ import Modal from "react-modal";
 import "./UserPage.css";
 import "./UserRegistration.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 Modal.setAppElement("#root");
 
 function UserPage() {
@@ -41,7 +43,7 @@ if (!token) {
 
   const load = async () => {
     const userRes = await axios.get(
-      "http://localhost:3000/emails/me",
+      `${API_URL}/emails/me`,
       { headers }
     );
 
@@ -49,7 +51,7 @@ if (!token) {
     setEmail(userRes.data.email);
 
     const photosRes = await axios.get(
-      "http://localhost:3000/emails/me/photos",
+      `${API_URL}/emails/me/photos`,
       { headers }
     );
 
@@ -78,7 +80,7 @@ if (!token) {
    const token = localStorage.getItem("userToken");
 
 await axios.post(
-  "http://localhost:3000/emails/add-photos",
+  `${API_URL}/emails/add-photos`,
   data,
   {
     headers: {
@@ -98,7 +100,7 @@ await axios.post(
 
     // recargar fotos
     const res = await axios.get(
-  "http://localhost:3000/emails/me/photos",
+  `${API_URL}/emails/me/photos`,
   {
     headers: {
       Authorization: `Bearer ${token}`,

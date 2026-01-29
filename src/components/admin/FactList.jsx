@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const FactList = () => {
   const [facts, setFacts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,7 +16,7 @@ const FactList = () => {
   useEffect(() => {
     const fetchFacts = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/facts");
+        const res = await axios.get(`${API_URL}/facts`);
         console.log("🚀 Facts desde backend:", res.data);
         setFacts(res.data.facts);
       } catch (error) {
@@ -27,7 +29,7 @@ const FactList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/facts/${id}`);
+      await axios.delete(`${API_URL}/facts/${id}`);
       setFacts((prev) => prev.filter((fact) => fact._id !== id));
     } catch (error) {
       console.error("Error al eliminar el fact:", error);
@@ -146,7 +148,7 @@ const FactList = () => {
                   try {
                     if (editFactId) {
                       const res = await axios.put(
-                        `http://localhost:3000/facts/${editFactId}`,
+                        `${API_URL}/facts/${editFactId}`,
                         { text: editFactText }
                       );
                       setFacts((prev) =>
@@ -156,7 +158,7 @@ const FactList = () => {
                       );
                     } else {
                       const res = await axios.post(
-                        "http://localhost:3000/facts",
+                        `${API_URL}/facts`,
                         { text: newFactText }
                       );
                       setFacts((prev) => [res.data.fact, ...prev]);

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 // Custom hook to manage facts state, pagination, and CRUD operations
 export default function useFacts() {
   const [facts, setFacts] = useState([]);
@@ -12,7 +14,7 @@ export default function useFacts() {
   // Fetch facts from API
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/facts")
+      .get(`${API_URL}/api/facts`)
       .then((res) => setFacts(res.data.facts))
       .catch(() => setFacts([]));
   }, []);
@@ -25,13 +27,13 @@ export default function useFacts() {
 
   // Add a fact
   const addFact = async (text) => {
-    const res = await axios.post("http://localhost:3000/api/facts", { text });
+    const res = await axios.post(`${API_URL}/api/facts`, { text });
     setFacts((prev) => [res.data.fact, ...prev]);
   };
 
   // Edit a fact
   const editFact = async (id, text) => {
-    const res = await axios.put(`http://localhost:3000/api/facts/${id}`, { text });
+    const res = await axios.put(`${API_URL}/api/facts/${id}`, { text });
     setFacts((prev) =>
       prev.map((fact) => (fact._id === id ? res.data.fact : fact))
     );
@@ -39,7 +41,7 @@ export default function useFacts() {
 
   // Delete a fact
   const deleteFact = async (id) => {
-    await axios.delete(`http://localhost:3000/api/facts/${id}`);
+    await axios.delete(`${API_URL}/api/facts/${id}`);
     setFacts((prev) => prev.filter((fact) => fact._id !== id));
   };
 
