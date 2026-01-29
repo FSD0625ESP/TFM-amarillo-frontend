@@ -60,6 +60,7 @@ function AppContent() {
         <Route path="/email" element={<EmailForm />} />
         <Route path="/register" element={<UserRegistration />} />
         <Route path="/auth" element={<AuthRedirect />} />
+        <Route path="/auth-redirect" element={<AuthRedirect />} />
         <Route path="/AddPhotos" element={<AddPhotos />} />
         <Route path="/userPage" element={<UserPage />} />
 
