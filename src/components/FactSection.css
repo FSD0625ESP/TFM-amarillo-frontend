@@ -3,7 +3,6 @@
   text-align: center;
   .fact-section {
     width: 100%; /* ancho menor para no llegar a los extremos */
-    border-bottom: 1px solid rgba(214, 164, 97, 0.45);
     margin: 0 auto; /* centra horizontalmente */
     text-align: center;
     font-size: 0.8rem;
@@ -42,8 +41,16 @@
 }
 
 /* Responsive */
-@media (max-width: 400px) {
+@media (max-width: 600px) {
   .fact-section {
-    padding: 1.5rem 0.75rem;
+    width: 90%;
+    padding: 0.6rem 0.75rem;
+    word-break: break-word; /* rompe palabras largas si hace falta */
+    margin: 0 auto; /* Centers the container */
+  }
+
+  .fact-inner {
+    white-space: normal;
+    line-height: 1.4;
   }
 }
