@@ -5,7 +5,11 @@ import "./Mosaic.css";
 export default function Mosaic() {
   const [theme, setTheme] = useState("day");
   // Estado para la imagen del mosaico y los datos de tiles
-  const [mosaicData, setMosaicData] = useState({ url: null, width: 0, height: 0 });
+  const [mosaicData, setMosaicData] = useState({
+    url: null,
+    width: 0,
+    height: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,14 +22,14 @@ export default function Mosaic() {
   const viewportRef = useRef(null);
   const contentRef = useRef(null); // Referencia a la imagen <img>
   const panStartRef = useRef({ x: 0, y: 0, startX: 0, startY: 0 });
-  
+
   // Datos lógicos para calcular clicks (no se renderizan, solo memoria)
-  const tilesRef = useRef([]); 
+  const tilesRef = useRef([]);
   const baseSizeRef = useRef({ width: 1, height: 1 });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const MIN_SCALE = 0.1; // Permite alejar mucho para ver imágenes gigantes
-  const MAX_SCALE = 10;  // Zoom profundo para detalles
+  const MAX_SCALE = 10; // Zoom profundo para detalles
 
   // 1. Gestión del Tema
   useEffect(() => {
@@ -80,8 +84,14 @@ export default function Mosaic() {
           if (Array.isArray(tiles)) {
             tilesRef.current = tiles;
             // Calcular tamaño lógico original del grid
-            const w = tiles.reduce((acc, t) => Math.max(acc, t.left + t.width), 0);
-            const h = tiles.reduce((acc, t) => Math.max(acc, t.top + t.height), 0);
+            const w = tiles.reduce(
+              (acc, t) => Math.max(acc, t.left + t.width),
+              0
+            );
+            const h = tiles.reduce(
+              (acc, t) => Math.max(acc, t.top + t.height),
+              0
+            );
             baseSizeRef.current = { width: w || 1, height: h || 1 };
           }
         }
@@ -108,7 +118,11 @@ export default function Mosaic() {
 
         if (isMounted) {
           if (finalUrl) {
-            setMosaicData({ url: finalUrl, width: finalWidth, height: finalHeight });
+            setMosaicData({
+              url: finalUrl,
+              width: finalWidth,
+              height: finalHeight,
+            });
           } else {
             setError("No hay imagen de mosaico disponible.");
           }
@@ -121,7 +135,9 @@ export default function Mosaic() {
       }
     };
     loadMosaic();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [API_URL]);
 
   // 4. Lógica de Zoom y Pan (Matemática pura)
@@ -131,13 +147,13 @@ export default function Mosaic() {
     const viewport = viewportRef.current;
     const content = contentRef.current;
     if (!viewport || !content) return;
-    
+
     // Centramos la imagen en su estado actual escalado
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
     const cw = content.offsetWidth * scale;
     const ch = content.offsetHeight * scale;
-    
+
     setOffset({
       x: Math.round((vw - cw) / 2),
       y: Math.round((vh - ch) / 2),
@@ -149,79 +165,88 @@ export default function Mosaic() {
     centerContent();
   };
 
-  const zoomTo = useCallback((nextScale, clientPoint) => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const rect = viewport.getBoundingClientRect();
-    
-    // Punto pivote del zoom
-    const base = clientPoint
-      ? { x: clientPoint.x - rect.left, y: clientPoint.y - rect.top }
-      : { x: rect.width / 2, y: rect.height / 2 };
+  const zoomTo = useCallback(
+    (nextScale, clientPoint) => {
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+      const rect = viewport.getBoundingClientRect();
 
-    // Calcular posición relativa antes del zoom
-    const normalizedX = (base.x - offset.x) / scale;
-    const normalizedY = (base.y - offset.y) / scale;
-    
-    const clampedScale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
-    
-    // Nueva posición para mantener el punto bajo el mouse
-    const nextOffset = {
-      x: base.x - normalizedX * clampedScale,
-      y: base.y - normalizedY * clampedScale,
-    };
+      // Punto pivote del zoom
+      const base = clientPoint
+        ? { x: clientPoint.x - rect.left, y: clientPoint.y - rect.top }
+        : { x: rect.width / 2, y: rect.height / 2 };
 
-    setScale(clampedScale);
-    setOffset(nextOffset);
-  }, [offset.x, offset.y, scale]);
+      // Calcular posición relativa antes del zoom
+      const normalizedX = (base.x - offset.x) / scale;
+      const normalizedY = (base.y - offset.y) / scale;
+
+      const clampedScale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
+
+      // Nueva posición para mantener el punto bajo el mouse
+      const nextOffset = {
+        x: base.x - normalizedX * clampedScale,
+        y: base.y - normalizedY * clampedScale,
+      };
+
+      setScale(clampedScale);
+      setOffset(nextOffset);
+    },
+    [offset.x, offset.y, scale]
+  );
 
   // 5. Lógica "Invisible": Click en Píxel -> Tile Database
-  const openTileAtPoint = useCallback((clientX, clientY) => {
-    const viewport = viewportRef.current;
-    const content = contentRef.current; // La etiqueta <img>
-    if (!viewport || !content) return;
+  const openTileAtPoint = useCallback(
+    (clientX, clientY) => {
+      const viewport = viewportRef.current;
+      const content = contentRef.current; // La etiqueta <img>
+      if (!viewport || !content) return;
 
-    const rect = viewport.getBoundingClientRect();
-    
-    // A. Coordenada click en la imagen visual (sin escala)
-    const clickX_Img = (clientX - rect.left - offset.x) / scale;
-    const clickY_Img = (clientY - rect.top - offset.y) / scale;
+      const rect = viewport.getBoundingClientRect();
 
-    // B. Factor de conversión (Imagen Real vs. Grid Lógico)
-    // El snapshot puede ser 4000px pero el grid lógico 1000px.
-    const logicalW = baseSizeRef.current.width;
-    const logicalH = baseSizeRef.current.height;
-    const displayedW = content.offsetWidth || 1;
-    const displayedH = content.offsetHeight || 1;
+      // A. Coordenada click en la imagen visual (sin escala)
+      const clickX_Img = (clientX - rect.left - offset.x) / scale;
+      const clickY_Img = (clientY - rect.top - offset.y) / scale;
 
-    const ratioX = logicalW / displayedW;
-    const ratioY = logicalH / displayedH;
+      // B. Factor de conversión (Imagen Real vs. Grid Lógico)
+      // El snapshot puede ser 4000px pero el grid lógico 1000px.
+      const logicalW = baseSizeRef.current.width;
+      const logicalH = baseSizeRef.current.height;
+      const displayedW = content.offsetWidth || 1;
+      const displayedH = content.offsetHeight || 1;
 
-    // C. Coordenada final en el sistema de tiles
-    const targetX = clickX_Img * ratioX;
-    const targetY = clickY_Img * ratioY;
+      const ratioX = logicalW / displayedW;
+      const ratioY = logicalH / displayedH;
 
-    // D. Buscar match en memoria
-    const tile = tilesRef.current.find(
-      (t) =>
-        targetX >= t.left &&
-        targetX <= t.left + t.width &&
-        targetY >= t.top &&
-        targetY <= t.top + t.height
-    );
+      // C. Coordenada final en el sistema de tiles
+      const targetX = clickX_Img * ratioX;
+      const targetY = clickY_Img * ratioY;
 
-    if (tile?.matchedUrl) {
-      window.open(tile.matchedUrl, "_blank", "noopener,noreferrer");
-    }
-  }, [offset.x, offset.y, scale]);
+      // D. Buscar match en memoria
+      const tile = tilesRef.current.find(
+        (t) =>
+          targetX >= t.left &&
+          targetX <= t.left + t.width &&
+          targetY >= t.top &&
+          targetY <= t.top + t.height
+      );
+
+      if (tile?.matchedUrl) {
+        window.open(tile.matchedUrl, "_blank", "noopener,noreferrer");
+      }
+    },
+    [offset.x, offset.y, scale]
+  );
 
   // 6. Event Handlers (Mouse/Touch)
-  const handleWheel = useCallback((event) => {
-    event.preventDefault();
-    const delta = event.deltaY;
-    const zoomFactor = delta < 0 ? 1.15 : 0.85; // Zoom un poco más ágil
-    zoomTo(scale * zoomFactor, { x: event.clientX, y: event.clientY });
-  }, [scale, zoomTo]);
+  const handleWheel = useCallback(
+    (event) => {
+      event.preventDefault();
+      const delta = event.deltaY;
+      const zoomFactor = delta < 0 ? 1.15 : 0.85; // Zoom un poco más ágil
+      zoomTo(scale * zoomFactor, { x: event.clientX, y: event.clientY });
+    },
+    [scale, zoomTo]
+  );
 
   const handlePointerDown = (event) => {
     if (event.button !== 0) return;
@@ -255,7 +280,7 @@ export default function Mosaic() {
     event.currentTarget.releasePointerCapture(event.pointerId);
     const wasDragged = panStartRef.current.moved;
     setIsPanning(false);
-    
+
     if (!wasDragged) {
       // Si fue un click limpio, abrimos la foto
       openTileAtPoint(event.clientX, event.clientY);
@@ -278,9 +303,11 @@ export default function Mosaic() {
   return (
     <main className="mosaic-page">
       <header className="mosaic-header">
-        <h1 className="mosaic-title">Mosaico Colaborativo</h1>
+        <h1 className="mosaic-title">
+          Mosaico colaborativo de La Sagrada Família
+        </h1>
         <p className="mosaic-subtitle">
-          Explora el mural en alta definición. Click para ver fotos originales.
+          Explora el mural foto a foto. Haz clic para verlas en alta definición.
         </p>
       </header>
 
@@ -288,11 +315,35 @@ export default function Mosaic() {
         <div className="mosaic-viewer">
           {/* Barra de Herramientas */}
           <div className="mosaic-toolbar">
-            <button className="mosaic-btn" onClick={() => zoomTo(scale * 1.25)} aria-label="Acercar" title="Zoom In">+</button>
-            <button className="mosaic-btn" onClick={() => zoomTo(scale * 0.8)} aria-label="Alejar" title="Zoom Out">−</button>
+            <button
+              className="mosaic-btn"
+              onClick={() => zoomTo(scale * 1.25)}
+              aria-label="Acercar"
+              title="Zoom In"
+            >
+              +
+            </button>
+            <button
+              className="mosaic-btn"
+              onClick={() => zoomTo(scale * 0.8)}
+              aria-label="Alejar"
+              title="Zoom Out"
+            >
+              −
+            </button>
             <span className="mosaic-zoom">{Math.round(scale * 100)}%</span>
-            <button className="mosaic-btn mosaic-btn-text" onClick={handleReset} title="Centrar">Centrar</button>
-            <button className="mosaic-btn mosaic-btn-text" onClick={handleToggleFullscreen} title="Pantalla Completa">
+            <button
+              className="mosaic-btn mosaic-btn-text"
+              onClick={handleReset}
+              title="Centrar"
+            >
+              Centrar
+            </button>
+            <button
+              className="mosaic-btn mosaic-btn-text"
+              onClick={handleToggleFullscreen}
+              title="Pantalla Completa"
+            >
               {isFullscreen ? "Salir" : "Pantalla"}
             </button>
           </div>
@@ -319,16 +370,18 @@ export default function Mosaic() {
                 style={{ transform: `scale(${scale})` }}
               >
                 {isLoading && (
-                   <div className="mosaic-loading-overlay">
-                     <div className="mosaic-spinner"></div>
-                     <p>Cargando mosaico...</p>
-                   </div>
+                  <div className="mosaic-loading-overlay">
+                    <div className="mosaic-spinner"></div>
+                    <p>Cargando mosaico...</p>
+                  </div>
                 )}
-                
+
                 {error && (
                   <div className="mosaic-fallback">
                     <p>{error}</p>
-                    <button onClick={() => window.location.reload()}>Reintentar</button>
+                    <button onClick={() => window.location.reload()}>
+                      Reintentar
+                    </button>
                   </div>
                 )}
 
@@ -346,7 +399,7 @@ export default function Mosaic() {
               </div>
             </div>
           </div>
-          
+
           <p className="mosaic-help">
             Arrastra para mover • Scroll para zoom • Click para ver original
           </p>

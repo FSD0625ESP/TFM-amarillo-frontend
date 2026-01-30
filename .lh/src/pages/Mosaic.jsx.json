@@ -3,11 +3,19 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1765474407526,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1769780497151,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -277,9 +277,9 @@\n \n   return (\n     <main className=\"mosaic-page\">\n       <header className=\"mosaic-header\">\n-        <h1 className=\"mosaic-title\">Mosaico Colaborativo</h1>\n+        <h1 className=\"mosaic-title\">Mosaico colaborativo de La Sagrada Família</h1>\n         <p className=\"mosaic-subtitle\">\n           Explora el mural en alta definición. Click para ver fotos originales.\n         </p>\n       </header>\n"
+                },
+                {
+                    "date": 1769780798617,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -306,9 +306,9 @@\n         <h1 className=\"mosaic-title\">\n           Mosaico colaborativo de La Sagrada Família\n         </h1>\n         <p className=\"mosaic-subtitle\">\n-          Explora el mural en alta definición. Click para ver fotos originales.\n+          Explora el mural foto a foto. Haz click para ver cada una de sus fotos en alta definición.\n         </p>\n       </header>\n \n       <section className=\"mosaic-container\">\n"
                 }
             ],
             "date": 1765474407526,

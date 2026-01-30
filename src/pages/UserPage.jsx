@@ -14,7 +14,30 @@ function UserPage() {
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState("");
   const token = localStorage.getItem("userToken");
-  // modal + form
+ const handleDelete = async (photoId) => {
+  const confirmDelete = window.confirm(
+    "¿Seguro que quieres borrar esta foto?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    const token = localStorage.getItem("userToken");
+
+    await axios.delete(
+      `http://localhost:3000/photos/${photoId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setPhotos((prev) => prev.filter((p) => p._id !== photoId));
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo borrar la foto");
+  }
+};
   const [modalOpen, setModalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -134,6 +157,7 @@ function UserPage() {
               <p>{photo.description}</p>
               <span className="likes">❤️ {photo.likes || 0}</span>
             </div>
+            <button className="delete-button" onClick={() => handleDelete(photo._id)}>Eliminar</button>
           </div>
         ))}
       </div>
@@ -187,7 +211,6 @@ function UserPage() {
             onChange={(e) => setFiles([...e.target.files])}
             required
           />
-
           <div className="modal-buttons">
             <button type="submit">Subir foto</button>
             <button type="button" onClick={() => setModalOpen(false)}>

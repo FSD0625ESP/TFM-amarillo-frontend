@@ -315,9 +315,12 @@ export default function Home() {
           >
             Sobre el proyecto
           </button>
-          <a href="/api/docs">API Docs</a>
-          <a href="https://github.com" target="_blank" rel="noreferrer">
-            GitHub
+          <a
+            href="https://github.com/FSD0625ESP/TFM-amarillo-frontend"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Yellow Team GitHub
           </a>
         </p>
       </footer>
