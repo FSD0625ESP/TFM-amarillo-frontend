@@ -9,12 +9,16 @@ export const getHighlightedPhotos = async () => {
 
 export const getPhotos = async (filters = {}) => {
   const params = {};
+  const token = localStorage.getItem("userToken");
 
   if (filters.country) params.country = filters.country;
   if (filters.year) params.year = filters.year;
   if (filters.sortBy) params.sortBy = filters.sortBy;
 
-  const { data } = await axios.get(`${API_URL}/photos`, { params });
+  const { data } = await axios.get(`${API_URL}/photos`, {
+    params,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
   return data;
 };
 
