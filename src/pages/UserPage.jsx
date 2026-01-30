@@ -25,7 +25,7 @@ function UserPage() {
     const token = localStorage.getItem("userToken");
 
     await axios.delete(
-      `http://localhost:3000/photos/${photoId}`,
+      `${API_URL}/photos/${photoId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
