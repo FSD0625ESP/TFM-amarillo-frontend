@@ -113,20 +113,13 @@ export default function Home() {
       <button onClick={goToUserPage} className="user-page-link">
         Mis Fotos
       </button>
-      <button
+      <button className="translate-button"
   onClick={() => {
     const select = document.querySelector(".goog-te-combo");
     if (select) {
       select.value = "en";
       select.dispatchEvent(new Event("change"));
     }
-  }}
-  style={{
-    fontSize: "12px",
-    padding: "4px 8px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    cursor: "pointer",
   }}
 >
   EN
