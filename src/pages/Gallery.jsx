@@ -20,6 +20,7 @@ export default function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [likingId, setLikingId] = useState(null);
   const [likeNotice, setLikeNotice] = useState("");
+  const [likedPhotoIds, setLikedPhotoIds] = useState(() => new Set());
 
   // 🔹 Estado de los filtros
   const [filters, setFilters] = useState({
@@ -106,16 +107,45 @@ export default function Gallery() {
       const result = await likePhoto(photoId);
       const updatedLikes =
         typeof result?.likes === "number" ? result.likes : undefined;
+      const liked =
+        typeof result?.liked === "boolean"
+          ? result.liked
+          : typeof result?.isLiked === "boolean"
+            ? result.isLiked
+            : true;
 
-      if (typeof updatedLikes === "number") {
-        setPhotos((prev) =>
-          prev.map((photo) =>
-            photo._id === photoId ? { ...photo, likes: updatedLikes } : photo
-          )
-        );
-        setSelectedPhoto((prev) =>
-          prev && prev._id === photoId ? { ...prev, likes: updatedLikes } : prev
-        );
+      setPhotos((prev) =>
+        prev.map((photo) =>
+          photo._id === photoId
+            ? {
+                ...photo,
+                likes: typeof updatedLikes === "number" ? updatedLikes : photo.likes,
+                likedByUser: liked,
+              }
+            : photo
+        )
+      );
+      setSelectedPhoto((prev) =>
+        prev && prev._id === photoId
+          ? {
+              ...prev,
+              likes: typeof updatedLikes === "number" ? updatedLikes : prev.likes,
+              likedByUser: liked,
+            }
+          : prev
+      );
+      if (liked) {
+        setLikedPhotoIds((prev) => {
+          const next = new Set(prev);
+          next.add(photoId);
+          return next;
+        });
+      } else {
+        setLikedPhotoIds((prev) => {
+          const next = new Set(prev);
+          next.delete(photoId);
+          return next;
+        });
       }
     } catch (error) {
       console.error("Error al dar like:", error);
@@ -125,6 +155,14 @@ export default function Gallery() {
     } finally {
       setLikingId(null);
     }
+  };
+
+  const isLikedByUser = (photo) => {
+    if (!photo) return false;
+    if (typeof photo.likedByUser === "boolean") return photo.likedByUser;
+    if (typeof photo.isLiked === "boolean") return photo.isLiked;
+    if (typeof photo.userLiked === "boolean") return photo.userLiked;
+    return likedPhotoIds.has(photo._id);
   };
 
   return (
@@ -247,14 +285,18 @@ export default function Gallery() {
                     <div className="likes-section">
                       <button
                         type="button"
-                        className="like-button"
+                        className={`like-button ${isLikedByUser(photo) ? "is-liked" : "is-unliked"}`}
                         onClick={(event) => {
                           event.stopPropagation();
                           handleLike(photo._id);
                         }}
                         disabled={likingId === photo._id}
+                        aria-pressed={isLikedByUser(photo)}
                       >
-                        ❤️ {photo.likes || 0}
+                        <span className="like-icon" aria-hidden="true">
+                          {isLikedByUser(photo) ? "♥" : "♡"}
+                        </span>
+                        <span>{photo.likes || 0}</span>
                       </button>
                     </div>
                   </div>
@@ -301,29 +343,31 @@ export default function Gallery() {
             >
               ×
             </button>
-            <button
-              type="button"
-              className="photo-modal-nav prev"
-              onClick={goPrev}
-              disabled={!hasPrev}
-              aria-label="Anterior"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              className="photo-modal-nav next"
-              onClick={goNext}
-              disabled={!hasNext}
-              aria-label="Siguiente"
-            >
-              ›
-            </button>
-            <img
-              src={selectedPhoto.imageUrl}
-              alt={selectedPhoto.title}
-              className="photo-modal-image"
-            />
+            <div className="photo-modal-media">
+              <button
+                type="button"
+                className="photo-modal-nav prev"
+                onClick={goPrev}
+                disabled={!hasPrev}
+                aria-label="Anterior"
+              >
+                ‹
+              </button>
+              <img
+                src={selectedPhoto.imageUrl}
+                alt={selectedPhoto.title}
+                className="photo-modal-image"
+              />
+              <button
+                type="button"
+                className="photo-modal-nav next"
+                onClick={goNext}
+                disabled={!hasNext}
+                aria-label="Siguiente"
+              >
+                ›
+              </button>
+            </div>
             <div className="photo-modal-info">
               <h3>{selectedPhoto.title}</h3>
               <p>
@@ -352,11 +396,15 @@ export default function Gallery() {
               <div className="likes-section">
                 <button
                   type="button"
-                  className="like-button"
+                  className={`like-button ${isLikedByUser(selectedPhoto) ? "is-liked" : "is-unliked"}`}
                   onClick={() => handleLike(selectedPhoto._id)}
                   disabled={likingId === selectedPhoto._id}
+                  aria-pressed={isLikedByUser(selectedPhoto)}
                 >
-                  ❤️ {selectedPhoto.likes || 0}
+                  <span className="like-icon" aria-hidden="true">
+                    {isLikedByUser(selectedPhoto) ? "♥" : "♡"}
+                  </span>
+                  <span>{selectedPhoto.likes || 0}</span>
                 </button>
               </div>
             </div>
