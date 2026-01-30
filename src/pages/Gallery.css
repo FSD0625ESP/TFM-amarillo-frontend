@@ -515,12 +515,40 @@
   }
 
   .photo-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 0.75rem;
+  }
+
+  .photo-card {
+    min-width: 0;
   }
 
   .image-wrapper img {
     height: 140px;
+  }
+
+  .photo-info {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .photo-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .meta-tags {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.45rem;
+  }
+
+  .likes-section {
+    align-self: flex-end;
+  }
+
+  .like-button {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.6rem;
   }
 
   .photo-modal-content {
