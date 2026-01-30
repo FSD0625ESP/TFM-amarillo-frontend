@@ -115,25 +115,39 @@ input[type="checkbox"] {
 button[type="submit"],
 .acciones button {
   padding: 0.9rem 1.5rem;
-  border: none;
+  border: 1px solid var(--accent);
   border-radius: 1rem;
-  background: linear-gradient(135deg, #ff8b3d, #ffb347);
+
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 92%, white),
+    var(--accent)
+  );
+
   color: white;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s;
+
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 button[type="submit"]:hover,
 .acciones button:hover {
-  background: linear-gradient(135deg, #ff7a1f, #ffaa33);
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 85%, black)
+  );
   transform: translateY(-2px);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 button[type="submit"]:disabled {
-  background: #ffd6b0;
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: color-mix(in srgb, var(--text) 60%, transparent);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* Post envío */
